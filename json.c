@@ -42,8 +42,6 @@ json_builder_new ()
   JsonBuilder *b = malloc(sizeof(JsonBuilder));
   if (!b)
     goto error;
-  b->src = NULL;
-  b->srclen = 0;
 
   b->keymap = map_new_with_offsets(offsetof(JsonVal, node), 0, 0);
   if (!b->keymap)
@@ -77,8 +75,6 @@ error:
 JsonStatus
 json_builder_clear (JsonBuilder *b)
 {
-  b->src = NULL;
-  b->srclen = 0;
   map_clear(b->keymap);
   jsmn_init(&b->parser);
   memset(b->tokens, 0, b->toklen * sizeof(jsmntok_t));
@@ -107,9 +103,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
   if (json_builder_clear(b) != JSON_OK)
     return JSON_ERR;
 
-  b->src = src;
-  b->srclen = srclen;
-
   int rc;
   rc = jsmn_parse(&b->parser, src, srclen, b->tokens, b->toklen);
 
@@ -118,6 +111,9 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
   // add all tokens to key map
   jsmntok_t *keytok, *valtok;
   JsonVal *val;
+
+  // start at index 1 because the 0th element
+  // is just the root json object.
   for (size_t i = 1; i < b->toklen; i += 2) {
     keytok = &b->tokens[i];
     if (!keytok->type)
@@ -137,11 +133,11 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     
     val = &b->vals[i];
     val->keytok = keytok;
-    val->keysrc = &b->src[val->keytok->start];
+    val->keysrc = &src[val->keytok->start];
 
     // parse type of value
     val->valtok = valtok;
-    val->valsrc = &b->src[val->valtok->start];
+    val->valsrc = &src[val->valtok->start];
     switch (*(val->valsrc)) {
       case 't':
         // true

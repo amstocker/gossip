@@ -47,16 +47,11 @@ typedef struct {
  * a time.
  **/
 struct JsonBuilder {
-  char *src;
-  size_t srclen;
-  
   Map *keymap;
-  
   jsmn_parser parser;
   jsmntok_t *tokens;
   size_t toklen;
-
-  JsonVal *vals;  // vals[0] is root json object
+  JsonVal *vals;
 };
 
 
