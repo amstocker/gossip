@@ -82,7 +82,7 @@ json_builder_clear (JsonBuilder *b)
   map_clear(b->keymap);
   jsmn_init(&b->parser);
   memset(b->tokens, 0, b->toklen * sizeof(jsmntok_t));
-  memset(b->vals, 0, (b->toklen / 2) * sizeof(jsmntok_t));
+  memset(b->vals, 0, (b->toklen / 2) * sizeof(JsonVal));
   return JSON_OK;
 }
 
