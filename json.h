@@ -48,9 +48,11 @@ typedef struct {
  **/
 struct JsonBuilder {
   Map *keymap;
+
   jsmn_parser parser;
   jsmntok_t *tokens;
   size_t toklen;
+  
   JsonVal *vals;
 };
 

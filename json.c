@@ -3,6 +3,12 @@
 
 #define TOKSIZE(tok) ((size_t) (tok->end - tok->start))
 
+
+/**
+ * Custom hash and comparator functions for plugging into
+ * the key map.
+ **/
+
 static uint32_t
 hash_val (void *key, size_t _)
 {
@@ -36,6 +42,7 @@ compare_val (void *lhs, void *rhs, size_t _)
 }
 
 
+
 JsonBuilder*
 json_builder_new ()
 {
@@ -43,7 +50,9 @@ json_builder_new ()
   if (!b)
     goto error;
 
-  b->keymap = map_new_with_offsets(offsetof(JsonVal, node), 0, 0);
+  b->keymap = map_new_with_offsets(offsetof(JsonVal, node),
+                                   0,  // use struct itself as the key (0 bytes offset)
+                                   0); // size is unused so just pass 0
   if (!b->keymap)
     goto error;
   b->keymap->hash = hash_val;
@@ -135,15 +144,16 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     val->keytok = keytok;
     val->keysrc = &src[val->keytok->start];
 
-    // parse type of value
+    // parse type of value from the first
+    // character of the token.
     val->valtok = valtok;
     val->valsrc = &src[val->valtok->start];
     switch (*(val->valsrc)) {
       case 't':
-        // true
+        // 'true'
         val->as_bool = 1;
       case 'f':
-        // false
+        // 'false'
         val->as_bool = 0;
         val->type = JSON_BOOL;
         break;
@@ -154,7 +164,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         val->type = JSON_DOUBLE;
         break;
       case 'n':
-        // null
+        // 'null'
         val->as_null = NULL;
         val->type = JSON_NULL;
         break;
@@ -179,7 +189,7 @@ JsonVal*
 json_lookup (JsonBuilder *b, char *key, size_t keylen)
 {
   // map is expecting a JsonVal*, so for a clean
-  // API we need some hacky dummy vars.
+  // API we need some handy dandy dummy vars.
   static jsmntok_t dummy_tok = { JSMN_STRING };
   static JsonVal dummy_val = { NULL, NULL, &dummy_tok };
   
