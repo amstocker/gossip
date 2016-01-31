@@ -6,7 +6,7 @@
 #include "hash.h"
 #include "comparator.h"
 #include "map.h"
-#include "jsmn.h"
+#include "thirdparty/jsmn.h"
 
 
 #define JSON_MAX_TOKENS 256
