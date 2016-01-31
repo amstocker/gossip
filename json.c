@@ -118,11 +118,12 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
   JsonVal *val;
   for (size_t i = 1; i < b->toklen; i += 2) {
     keytok = &b->tokens[i];
-    if (keytok->type && !(i + 1 < b->toklen))
-      goto error;
     if (!keytok->type)
       // done adding.
       break;
+    if (!(i + 1 < b->toklen))
+      // should end up with an even number of KV pairs
+      goto error;
     valtok = &b->tokens[i+1];
     
     // only accept key-value pairs with string keys and
@@ -179,9 +180,9 @@ json_lookup (JsonBuilder *b, char *key, size_t keylen)
 {
   static jsmntok_t dummy_tok = { JSMN_STRING };
   static JsonBuilder dummy_builder = { NULL };
-  static const JsonVal dummy_val = { &dummy_builder, &dummy_tok };
+  static JsonVal dummy_val = { &dummy_builder, &dummy_tok };
   
   dummy_builder.src = key;
   dummy_tok.end = keylen;
-  return map_get(b->keymap, (void*) &dummy_val);
+  return map_get(b->keymap, &dummy_val);
 }
