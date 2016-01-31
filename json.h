@@ -1,0 +1,47 @@
+#include <stdlib.h>
+#include <stddef.h>
+
+#include "utils.h"
+#include "hash.h"
+#include "comparator.h"
+#include "map.h"
+#include "jsmn.h"
+
+
+#define JSON_MAX_TOKENS 256
+
+typedef enum {
+  JSON_OK,
+  JSON_ERR
+} JsonStatus;
+
+typedef struct JsonBuilder JsonBuilder;
+
+typedef struct {
+  JsonBuilder *builder;
+  jsmntok_t *tok;
+  MapNode node;
+} JsonVal;
+
+/**
+ * Reusable map and token array for quick parsing of json with ability to
+ * query for keys.  Each builder can only focus on one json source string at
+ * a time.
+ **/
+struct JsonBuilder {
+  char *src;
+  size_t srclen;
+  
+  Map *keymap;
+  
+  jsmn_parser parser;
+  jsmntok_t *tokens;
+  size_t toklen;
+
+  JsonVal *vals;  // vals[0] is root json object
+};
+
+
+JsonBuilder *json_builder_new ();
+JsonStatus json_builder_clear (JsonBuilder *b);
+JsonStatus json_parse_src (JsonBuilder *b, char *src, size_t srclen);
