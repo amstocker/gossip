@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 
@@ -15,12 +16,28 @@ typedef enum {
   JSON_ERR
 } JsonStatus;
 
+typedef enum {
+  JSON_STRING,
+  JSON_BOOL,
+  JSON_DOUBLE,
+  JSON_NULL
+} JsonValType;
+
 typedef struct JsonBuilder JsonBuilder;
 
 typedef struct {
   JsonBuilder *builder;
-  jsmntok_t *tok;
+  jsmntok_t *keytok,
+            *valtok;
   MapNode node;
+
+  JsonValType type;
+  union {
+    char *as_string;
+    int as_bool;
+    double as_double;
+    void *as_null;
+  };
 } JsonVal;
 
 /**
@@ -42,6 +59,9 @@ struct JsonBuilder {
 };
 
 
+#define JSON_VAL_TOKLEN(v) (v->valtok->end - v->valtok->start)
+
 JsonBuilder *json_builder_new ();
 JsonStatus json_builder_clear (JsonBuilder *b);
 JsonStatus json_parse_src (JsonBuilder *b, char *src, size_t srclen);
+JsonVal *json_lookup (JsonBuilder *b, char *key, size_t keylen);
