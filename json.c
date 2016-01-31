@@ -150,7 +150,8 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         break;
       case '0' ... '9':
       case '-':
-        sscanf(start, "%lf", &val->as_double);
+        if (sscanf(start, "%lf", &val->as_double) < 1)
+          goto error;
         val->type = JSON_DOUBLE;
         break;
       case 'n':
