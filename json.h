@@ -17,16 +17,17 @@ typedef enum {
 } JsonStatus;
 
 typedef enum {
+  JSON_NULL=0,
   JSON_STRING,
   JSON_BOOL,
-  JSON_DOUBLE,
-  JSON_NULL
+  JSON_DOUBLE
 } JsonValType;
 
 typedef struct JsonBuilder JsonBuilder;
 
 typedef struct {
-  JsonBuilder *builder;
+  char *keysrc,
+       *valsrc;
   jsmntok_t *keytok,
             *valtok;
   MapNode node;
@@ -63,5 +64,6 @@ struct JsonBuilder {
 
 JsonBuilder *json_builder_new ();
 JsonStatus json_builder_clear (JsonBuilder *b);
+JsonStatus json_builder_destroy (JsonBuilder *b);
 JsonStatus json_parse_src (JsonBuilder *b, char *src, size_t srclen);
 JsonVal *json_lookup (JsonBuilder *b, char *key, size_t keylen);

@@ -9,8 +9,8 @@ hash_val (void *key, size_t _)
   (void) _;  // unused
   JsonVal *val = (JsonVal *) key;
   
-  return hash_djb2_ic((void *) &val->builder->src[val->keytok->start],
-                      TOKSIZE(val->keytok));
+  // hash slice of original json source.
+  return hash_djb2_ic(val->keysrc, TOKSIZE(val->keytok));
 }
 
 
@@ -18,28 +18,21 @@ static int
 compare_val (void *lhs, void *rhs, size_t _)
 {
   (void) _;  // unused
-  JsonVal *lval = (JsonVal *) lhs,
-          *rval = (JsonVal *) rhs;
-  size_t lsize = TOKSIZE(lval->keytok),
-         rsize = TOKSIZE(rval->keytok);
-  int cmp =  comparator_string_ic((void *) &lval->builder->src[lval->keytok->start],
-                                  (void *) &rval->builder->src[rval->keytok->start],
+  size_t lsize = TOKSIZE(((JsonVal *) lhs)->keytok),
+         rsize = TOKSIZE(((JsonVal *) rhs)->keytok);
+
+  // compare slices of original json
+  // source string (ignoring case).
+  int cmp =  comparator_string_ic(((JsonVal *) lhs)->keysrc,
+                                  ((JsonVal *) rhs)->keysrc,
                                   MIN(lsize, rsize));
   
+  // if first N chars are equal but size
+  // doesn't match, cannot return 0.
   if (cmp == 0 && lsize != rsize)
     return lsize - rsize;
   else
     return cmp;
-}
-
-
-static void
-clear_val (JsonVal *val)
-{
-  val->keytok = NULL;
-  val->valtok = NULL;
-  val->type = JSON_NULL;
-  val->as_null = NULL;
 }
 
 
@@ -67,10 +60,6 @@ json_builder_new ()
   b->vals = calloc(b->toklen / 2, sizeof(JsonVal));
   if (!b->vals)
     goto error;
-  for (size_t i = 0; i < b->toklen / 2; i++) {
-    b->vals[i].builder = b;
-    clear_val(&b->vals[i]);
-  }
 
   return b;
 
@@ -93,8 +82,21 @@ json_builder_clear (JsonBuilder *b)
   map_clear(b->keymap);
   jsmn_init(&b->parser);
   memset(b->tokens, 0, b->toklen * sizeof(jsmntok_t));
-  for (size_t i = 0; i < b->toklen; i++)
-    clear_val(&b->vals[i]);
+  memset(b->vals, 0, (b->toklen / 2) * sizeof(jsmntok_t));
+  return JSON_OK;
+}
+
+
+JsonStatus
+json_builder_destroy (JsonBuilder *b)
+{
+  if (!b)
+    return JSON_ERR;
+  if (map_free(b->keymap) != MAP_OK)
+    return JSON_ERR;
+  free(b->tokens);
+  free(b->vals);
+  free(b);
   return JSON_OK;
 }
 
@@ -135,11 +137,12 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     
     val = &b->vals[i];
     val->keytok = keytok;
-    val->valtok = valtok;
+    val->keysrc = &b->src[val->keytok->start];
 
-    // parse type
-    char *start = &b->src[val->valtok->start];
-    switch (*start) {
+    // parse type of value
+    val->valtok = valtok;
+    val->valsrc = &b->src[val->valtok->start];
+    switch (*(val->valsrc)) {
       case 't':
         // true
         val->as_bool = 1;
@@ -150,7 +153,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         break;
       case '0' ... '9':
       case '-':
-        if (sscanf(start, "%lf", &val->as_double) < 1)
+        if (sscanf(val->valsrc, "%lf", &val->as_double) < 1)
           goto error;
         val->type = JSON_DOUBLE;
         break;
@@ -160,7 +163,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         val->type = JSON_NULL;
         break;
       default:
-        val->as_string = start;
+        val->as_string = val->valsrc;
         val->type = JSON_STRING;
     }
     
@@ -179,11 +182,12 @@ error:
 JsonVal*
 json_lookup (JsonBuilder *b, char *key, size_t keylen)
 {
+  // map is expecting a JsonVal*, so for a clean
+  // API we need some hacky dummy vars.
   static jsmntok_t dummy_tok = { JSMN_STRING };
-  static JsonBuilder dummy_builder = { NULL };
-  static JsonVal dummy_val = { &dummy_builder, &dummy_tok };
+  static JsonVal dummy_val = { NULL, NULL, &dummy_tok };
   
-  dummy_builder.src = key;
+  dummy_val.keysrc = key;
   dummy_tok.end = keylen;
   return map_get(b->keymap, &dummy_val);
 }
