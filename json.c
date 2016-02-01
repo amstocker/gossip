@@ -119,12 +119,11 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
 
   if (rc < 0) goto error;
 
-  // add all tokens to key map
-  jsmntok_t *keytok, *valtok;
-  JsonVal *val;
-
+  // add all tokens to key map.
   // start at index 1 because the 0th element
   // is just the root json object.
+  jsmntok_t *keytok, *valtok;
+  JsonVal *p = b->vals, *val;
   for (size_t i = 1; i < b->toklen; i += 2) {
     keytok = &b->tokens[i];
     if (!keytok->type)
@@ -142,7 +141,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
          valtok->type != JSMN_PRIMITIVE))
       goto error;
     
-    val = &b->vals[i];
+    val = p++;
     val->key = &src[keytok->start];
     val->key_size = TOKSIZE(keytok);
     val->size = TOKSIZE(valtok);
