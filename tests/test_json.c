@@ -3,22 +3,39 @@
 
 #include "json.h"
 
-
 static char *JSON_SRC = "{\"Andrew\": 25, \"Rules?\": \"Yes.\"}";
 
+
+void print_val_for (JsonBuilder *j, char *key)
+{
+  JsonVal *val = json_lookup(j, key, strlen(key));
+  switch (val->type) {
+    case JSON_STRING:
+      printf("%s: %.*s\n", key, (int) val->size, val->as_string);
+      break;
+    case JSON_DOUBLE:
+      printf("%s: %lf\n", key, val->as_double);
+      break;
+    case JSON_BOOL:
+      printf("%s: %s\n", key, val->as_bool ? "true" : "false");
+      break;
+    case JSON_NULL:
+      printf("%s: (null)\n", key);
+      break;
+  }
+}
+
+
 int main() {
-  JsonVal *val;
 
-  JsonBuilder *jb = json_builder_new();
+  JsonBuilder *j = json_builder_new();
   
-  json_parse_src(jb, JSON_SRC, strlen(JSON_SRC));
+  json_parse_src(j, JSON_SRC, strlen(JSON_SRC));
 
-  val = json_lookup(jb, "andrew", 6);
-  printf("get 'andrew': %lf\n", val->as_double);
+  print_val_for(j, "andrew");
+  print_val_for(j, "rules?");
+  print_val_for(j, "doesnotexist");
 
-  val = json_lookup(jb, "rules?", 6);
-  printf("get 'rules?': %.*s\n", (int) val->size, val->as_string);
-
-  json_builder_destroy(jb);  
+  json_builder_destroy(j);  
   return 0;
 }

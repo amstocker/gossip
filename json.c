@@ -3,6 +3,9 @@
 
 #define TOKSIZE(tok) ((size_t) (tok->end - tok->start))
 
+// instead returning a null pointer return this
+static const JsonVal JSONVAL_NULL = {{0}};
+
 
 /**
  * Custom hash and comparator functions for plugging into
@@ -201,8 +204,11 @@ json_lookup (JsonBuilder *b, char *key, size_t key_size)
 {
   // use dummy var for cleaner API.
   static JsonVal dummy_val;
+  JsonVal *val;
 
   dummy_val.key = key;
   dummy_val.key_size = key_size;
-  return map_get(b->keymap, &dummy_val);
+  return (val = map_get(b->keymap, &dummy_val))
+         ? val
+         : (JsonVal *) &JSONVAL_NULL;
 }
