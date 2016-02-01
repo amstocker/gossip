@@ -146,32 +146,41 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     val->key_size = TOKSIZE(keytok);
     val->size = TOKSIZE(valtok);
 
-    // parse type of value from the first
-    // character of the token.
+    // parse type of value.
     char *start = &src[valtok->start];
-    switch (*start) {
-      case 't':
-        // 'true'
-        val->as_bool = 1;
-      case 'f':
-        // 'false'
-        val->as_bool = 0;
-        val->type = JSON_BOOL;
-        break;
-      case '0' ... '9':
-      case '-':
-        if (sscanf(start, "%lf", &val->as_double) < 1)
-          goto error;
-        val->type = JSON_DOUBLE;
-        break;
-      case 'n':
-        // 'null'
-        val->as_null = NULL;
-        val->type = JSON_NULL;
-        break;
-      default:
+    switch (valtok->type) {
+      case JSMN_STRING:
         val->as_string = start;
         val->type = JSON_STRING;
+        break;
+      case JSMN_PRIMITIVE:
+        switch (*start) {
+          case '0' ... '9':
+          case '-':
+            // double
+            if (sscanf(start, "%lf", &val->as_double) < 1)
+              goto error;
+            val->type = JSON_DOUBLE;
+            break;
+          case 't':
+            // 'true'
+            val->as_bool = 1;
+          case 'f':
+            // 'false'
+            val->as_bool = 0;
+            val->type = JSON_BOOL;
+            break;
+          case 'n':
+            // 'null'
+            val->as_null = NULL;
+            val->type = JSON_NULL;
+            break;
+          default:
+            goto error;
+        }
+        break;
+      default:
+        goto error;
     }
     
     if (map_add(b->keymap, val) != MAP_OK)
