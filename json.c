@@ -143,12 +143,12 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     val = &b->vals[i];
     val->keytok = keytok;
     val->keysrc = &src[val->keytok->start];
+    val->size = TOKSIZE(valtok);
 
     // parse type of value from the first
     // character of the token.
-    val->valtok = valtok;
-    val->valsrc = &src[val->valtok->start];
-    switch (*(val->valsrc)) {
+    char *start = &src[valtok->start];
+    switch (*start) {
       case 't':
         // 'true'
         val->as_bool = 1;
@@ -159,7 +159,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         break;
       case '0' ... '9':
       case '-':
-        if (sscanf(val->valsrc, "%lf", &val->as_double) < 1)
+        if (sscanf(start, "%lf", &val->as_double) < 1)
           goto error;
         val->type = JSON_DOUBLE;
         break;
@@ -169,7 +169,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         val->type = JSON_NULL;
         break;
       default:
-        val->as_string = val->valsrc;
+        val->as_string = start;
         val->type = JSON_STRING;
     }
     
@@ -190,8 +190,8 @@ json_lookup (JsonBuilder *b, char *key, size_t keylen)
 {
   // map is expecting a JsonVal*, so for a clean
   // API we need some handy dandy dummy vars.
-  static jsmntok_t dummy_tok = { JSMN_STRING };
-  static JsonVal dummy_val = { NULL, NULL, &dummy_tok };
+  static jsmntok_t dummy_tok = { .type = JSMN_STRING };
+  static JsonVal dummy_val = { .keytok = &dummy_tok };
   
   dummy_val.keysrc = key;
   dummy_tok.end = keylen;

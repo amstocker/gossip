@@ -15,7 +15,7 @@ int main() {
   printf("get 'andrew': %lf\n", val->as_double);
 
   val = json_lookup(jb, "rules?", 6);
-  printf("get 'rules?': %.*s\n", JSON_VAL_TOKLEN(val), val->as_string);
+  printf("get 'rules?': %.*s\n", (int) val->size, val->as_string);
 
   json_builder_destroy(jb);  
   return 0;

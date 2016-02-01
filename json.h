@@ -24,22 +24,25 @@ typedef enum {
 } JsonValType;
 
 typedef struct JsonBuilder JsonBuilder;
+typedef struct JsonVal JsonVal;
 
-typedef struct {
-  char *keysrc,
-       *valsrc;
-  jsmntok_t *keytok,
-            *valtok;
-  MapNode node;
-
-  JsonValType type;
+struct JsonVal {
   union {
     char *as_string;
     int as_bool;
     double as_double;
     void *as_null;
   };
-} JsonVal;
+  JsonValType type;
+  size_t size;
+  
+  char *keysrc,
+       *valsrc;
+  jsmntok_t *keytok,
+            *valtok;
+  
+  MapNode node;
+};
 
 /**
  * Reusable map and token array for quick parsing of json with ability to
@@ -56,8 +59,6 @@ struct JsonBuilder {
   size_t toklen;
 };
 
-
-#define JSON_VAL_TOKLEN(v) (v->valtok->end - v->valtok->start)
 
 JsonBuilder *json_builder_new ();
 JsonStatus json_builder_clear (JsonBuilder *b);
