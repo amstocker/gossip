@@ -3,10 +3,10 @@
 #include <stddef.h>
 
 #include "utils.h"
-#include "hash.h"
-#include "comparator.h"
-#include "map.h"
 #include "thirdparty/jsmn.h"
+#include "collections/hash.h"
+#include "collections/comparator.h"
+#include "collections/map.h"
 
 
 #define JSON_MAX_TOKENS 256
@@ -47,13 +47,13 @@ typedef struct {
  * a time.
  **/
 struct JsonBuilder {
+  JsonVal *vals;
   Map *keymap;
-
+  
+  // for use by the jsmn parsing library
   jsmn_parser parser;
   jsmntok_t *tokens;
   size_t toklen;
-  
-  JsonVal *vals;
 };
 
 
