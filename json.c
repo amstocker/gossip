@@ -16,7 +16,7 @@ hash_val (void *key, size_t _)
   JsonVal *val = (JsonVal *) key;
   
   // hash slice of original json source.
-  return hash_djb2_ic(val->keysrc, TOKSIZE(val->keytok));
+  return hash_djb2_ic(val->key, val->key_size);
 }
 
 
@@ -24,19 +24,21 @@ static int
 compare_val (void *lhs, void *rhs, size_t _)
 {
   (void) _;  // unused
-  size_t lsize = TOKSIZE(((JsonVal *) lhs)->keytok),
-         rsize = TOKSIZE(((JsonVal *) rhs)->keytok);
+  JsonVal *lval = (JsonVal *) lhs,
+          *rval = (JsonVal *) rhs;
 
   // compare slices of original json
   // source string (ignoring case).
-  int cmp =  comparator_string_ic(((JsonVal *) lhs)->keysrc,
-                                  ((JsonVal *) rhs)->keysrc,
-                                  MIN(lsize, rsize));
+  int cmp =  comparator_string_ic(lval->key,
+                                  rval->key,
+                                  MIN(lval->key_size,
+                                      rval->key_size)
+                                  );
   
   // if first N chars are equal but size
   // doesn't match, cannot return 0.
-  if (cmp == 0 && lsize != rsize)
-    return lsize - rsize;
+  if (cmp == 0 && lval->key_size != rval->key_size)
+    return lval->key_size - rval->key_size;
   else
     return cmp;
 }
@@ -141,8 +143,8 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
       goto error;
     
     val = &b->vals[i];
-    val->keytok = keytok;
-    val->keysrc = &src[val->keytok->start];
+    val->key = &src[keytok->start];
+    val->key_size = TOKSIZE(keytok);
     val->size = TOKSIZE(valtok);
 
     // parse type of value from the first
@@ -186,14 +188,12 @@ error:
 
 
 JsonVal*
-json_lookup (JsonBuilder *b, char *key, size_t keylen)
+json_lookup (JsonBuilder *b, char *key, size_t key_size)
 {
-  // map is expecting a JsonVal*, so for a clean
-  // API we need some handy dandy dummy vars.
-  static jsmntok_t dummy_tok = { .type = JSMN_STRING };
-  static JsonVal dummy_val = { .keytok = &dummy_tok };
+  // use dummy var for cleaner API.
+  static JsonVal dummy_val;
   
-  dummy_val.keysrc = key;
-  dummy_tok.end = keylen;
+  dummy_val.key = key;
+  dummy_val.key_size = key_size;
   return map_get(b->keymap, &dummy_val);
 }

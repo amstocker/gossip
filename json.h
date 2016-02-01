@@ -35,12 +35,9 @@ struct JsonVal {
   };
   JsonValType type;
   size_t size;
-  
-  char *keysrc,
-       *valsrc;
-  jsmntok_t *keytok,
-            *valtok;
-  
+
+  char *key;
+  size_t key_size;
   MapNode node;
 };
 
