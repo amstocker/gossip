@@ -20,7 +20,10 @@ void print_val_for (JsonBuilder *j, char *key)
       printf("%s: %s\n", key, val->as_bool ? "true" : "false");
       break;
     case JSON_NULL:
-      printf("%s: (null)\n", key);
+      printf("%s: null\n", key);
+      break;
+    case JSON_UNDEFINED:
+      printf("%s: (undefined)\n", key);
       break;
   }
 }

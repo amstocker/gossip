@@ -17,10 +17,11 @@ typedef enum {
 } JsonStatus;
 
 typedef enum {
-  JSON_NULL=0,
+  JSON_UNDEFINED=0,
   JSON_STRING,
+  JSON_DOUBLE,
   JSON_BOOL,
-  JSON_DOUBLE
+  JSON_NULL
 } JsonValType;
 
 typedef struct JsonBuilder JsonBuilder;
