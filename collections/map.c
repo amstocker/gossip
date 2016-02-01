@@ -85,7 +85,6 @@ map_clear (Map *m)
   MapNode *next = NULL;
   size_t i = m->nbuckets;
   while (i--) {
-    map_node_init(m->buckets[i]);
     m->buckets[i]->next = next;
     next = m->buckets[i];
   }
