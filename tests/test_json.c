@@ -3,10 +3,13 @@
 
 #include "json.h"
 
+
 static char *JSON_SRC = "{\"Andrew\": 25, \"Rules?\": \"Yes.\"}";
 
+JsonBuilder *j;
 
-void print_val_for (JsonBuilder *j, char *key)
+
+void print_val_for (char *key)
 {
   JsonVal *val = json_lookup(j, key, strlen(key));
   switch (val->type) {
@@ -30,14 +33,13 @@ void print_val_for (JsonBuilder *j, char *key)
 
 
 int main() {
-
-  JsonBuilder *j = json_builder_new();
+  j = json_builder_new();
   
   json_parse_src(j, JSON_SRC, strlen(JSON_SRC));
 
-  print_val_for(j, "andrew");
-  print_val_for(j, "rules?");
-  print_val_for(j, "doesnotexist");
+  print_val_for("andrew");
+  print_val_for("rules?");
+  print_val_for("doesnotexist");
 
   json_builder_destroy(j);  
   return 0;
