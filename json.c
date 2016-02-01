@@ -154,6 +154,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         val->type = JSON_STRING;
         break;
       case JSMN_PRIMITIVE:
+        // parse primitive from first char
         switch (*start) {
           case '0' ... '9':
           case '-':
@@ -200,7 +201,7 @@ json_lookup (JsonBuilder *b, char *key, size_t key_size)
 {
   // use dummy var for cleaner API.
   static JsonVal dummy_val;
-  
+
   dummy_val.key = key;
   dummy_val.key_size = key_size;
   return map_get(b->keymap, &dummy_val);

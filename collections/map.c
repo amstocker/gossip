@@ -80,6 +80,21 @@ map_free_all (Map *m, void (*_free) (void*))
 
 
 MapStatus
+map_clear (Map *m)
+{
+  MapNode *next = NULL;
+  size_t i = m->nbuckets;
+  while (i--) {
+    map_node_init(m->buckets[i]);
+    m->buckets[i]->next = next;
+    next = m->buckets[i];
+  }
+  m->nelements = 0;
+  return MAP_OK;
+}
+
+
+MapStatus
 map_add (Map *m, void *elem)
 {
   MapNode *node = NODE(m, elem);
@@ -123,16 +138,6 @@ map_remove (Map *m, void *key)
     bucket = bucket->next;
   }
   return NULL;
-}
-
-
-MapStatus
-map_clear (Map *m)
-{
-  for (size_t i = 0; i < m->nbuckets; i++)
-    if (map_node_init(m->buckets[i]) == MAP_ERR)
-      return MAP_ERR;
-  return MAP_OK;
 }
 
 
