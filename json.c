@@ -3,8 +3,10 @@
 
 #define TOKSIZE(tok) ((size_t) (tok->end - tok->start))
 
-// instead returning a null pointer return this
-static const JsonVal JSONVAL_NULL = {{0}};
+/* instead of returning a null pointer return this, which means
+ * thats they given key does not exist.
+ */
+static const JsonVal JSONVAL_UNDEFINED = {{0}};
 
 
 /**
@@ -17,11 +19,9 @@ hash_val (void *key, size_t _)
 {
   (void) _;  // unused
   JsonVal *val = (JsonVal *) key;
-  
   // hash slice of original json source.
   return hash_djb2_ic(val->key, val->key_size);
 }
-
 
 static int
 compare_val (void *lhs, void *rhs, size_t _)
@@ -29,7 +29,6 @@ compare_val (void *lhs, void *rhs, size_t _)
   (void) _;  // unused
   JsonVal *lval = (JsonVal *) lhs,
           *rval = (JsonVal *) rhs;
-
   // compare slices of original json
   // source string (ignoring case).
   int cmp =  comparator_string_ic(lval->key,
@@ -37,7 +36,6 @@ compare_val (void *lhs, void *rhs, size_t _)
                                   MIN(lval->key_size,
                                       rval->key_size)
                                   );
-  
   // if first N chars are equal but size
   // doesn't match, cannot return 0.
   if (cmp == 0 && lval->key_size != rval->key_size)
@@ -210,5 +208,5 @@ json_lookup (JsonBuilder *b, char *key, size_t key_size)
   dummy_val.key_size = key_size;
   return (val = map_get(b->keymap, &dummy_val))
          ? val
-         : (JsonVal *) &JSONVAL_NULL;
+         : (JsonVal *) &JSONVAL_UNDEFINED;
 }
