@@ -4,7 +4,7 @@
 #define TOKSIZE(tok) ((size_t) (tok->end - tok->start))
 
 /* instead of returning a null pointer return this, which means
- * thats they given key does not exist.
+ * thats the given key does not exist.
  */
 static const JsonVal JSONVAL_UNDEFINED = {{0}};
 

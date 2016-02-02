@@ -1,4 +1,4 @@
-#include "comparator.h"
+#include "collections/comparator.h"
 
 
 #define COMPARATOR(NAME, TYPE) \
