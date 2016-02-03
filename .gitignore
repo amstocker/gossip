@@ -1,4 +1,11 @@
+# executables #
+gossip
+
+# dependency builds #
+deps/jsmn/jsmn.o
 deps/libuv/libuv*/
 deps/leveldb/leveldb*/
-gossip
+
+# backup files #
+*~
 *.swp
