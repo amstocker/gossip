@@ -6,7 +6,7 @@
 #define KEY(M, E) ((void*) ((size_t) E + M->key_offset))
 #define NODE(M, E) ((MapNode*) ((size_t) E + M->node_offset))
 #define ELEM(M, N) ((void *) ((size_t) N - M->node_offset))
-#define HASH(M, K) ((size_t) (M->hash(K, M->key_size)))
+#define HASH(M, K, S) ((size_t) (M->hash(K, S)))
 
 static void init_anchors (MapNode **buckets, size_t size);
 static void free_anchors (MapNode **buckets, size_t size);
@@ -18,6 +18,7 @@ MapStatus
 map_node_init (MapNode *n)
 {
   n->key = NULL;
+  n->key_size = 0;
   n->hash = 0;
   n->next = NULL;
   return MAP_OK;
@@ -25,7 +26,7 @@ map_node_init (MapNode *n)
 
 
 Map*
-map_new_with_offsets (size_t node_offset, size_t key_offset, size_t key_size)
+map_new_with_offsets (size_t node_offset, size_t key_offset)
 {
   Map *m = malloc(sizeof(Map));
   if (!m)
@@ -35,7 +36,6 @@ map_new_with_offsets (size_t node_offset, size_t key_offset, size_t key_size)
   m->buckets = calloc(MAP_INIT_SIZE, sizeof(MapNode*));
   m->node_offset = node_offset;
   m->key_offset = key_offset;
-  m->key_size = key_size;
   m->nbuckets = MAP_INIT_SIZE;
   m->nelements = 0;
   init_anchors(m->buckets, m->nbuckets);
@@ -46,7 +46,7 @@ map_new_with_offsets (size_t node_offset, size_t key_offset, size_t key_size)
 Map*
 string_map_new_with_offsets (size_t node_offset, size_t key_offset)
 {
-  Map *m = map_new_with_offsets(node_offset, key_offset, 0);
+  Map *m = map_new_with_offsets(node_offset, key_offset);
   m->hash = map_string_hash;
   m->cmp = map_string_comparator;
   return m;
@@ -94,25 +94,30 @@ map_clear (Map *m)
 
 
 MapStatus
-map_add (Map *m, void *elem)
+map_add (Map *m, void *elem, size_t key_size)
 {
   MapNode *node = NODE(m, elem);
   node->key = KEY(m, elem);
+  node->key_size = key_size;
   if (!node->key)
     return MAP_ERR;
-  node->hash = HASH(m, node->key);
+  node->hash = HASH(m, node->key, node->key_size);
   if (maybe_rehash(m) == MAP_ERR)
     return MAP_ERR;
   return add_node(m, node);
 }
 
 
+#include <stdio.h>
 void*
-map_get (Map *m, void *key)
+map_get (Map *m, void *key, size_t key_size)
 {
-  MapNode *bucket = m->buckets[ HASH(m, key) % m->nbuckets ]->next;
+  printf("map_get: %.*s\n", (int) key_size, (char *) key);
+  uint32_t index = HASH(m, key, key_size) % m->nbuckets;
+  MapNode *bucket = m->buckets[index]->next;
   while (bucket && bucket->key) {
-    if (m->cmp(key, bucket->key, m->key_size) == 0)
+    if (m->cmp(key, key_size, bucket->key, bucket->key_size)
+        == 0)
       return ELEM(m, bucket);
     bucket = bucket->next;
   }
@@ -121,13 +126,15 @@ map_get (Map *m, void *key)
 
 
 void*
-map_remove (Map *m, void *key)
+map_remove (Map *m, void *key, size_t key_size)
 {
-  uint32_t index = HASH(m, key) % m->nbuckets;
+  uint32_t index = HASH(m, key, key_size) % m->nbuckets;
   MapNode *prev = m->buckets[index];
   MapNode *bucket = prev->next;
   while (bucket && bucket->key) {
-    if (m->cmp(key, bucket->key, m->key_size) == 0) {
+    if (m->cmp(key, key_size, bucket->key, bucket->key_size)
+        == 0)
+    {
       prev->next = bucket->next;
       map_node_init(bucket);
       m->nelements--;
@@ -206,7 +213,8 @@ add_node (Map *m, MapNode *node)
   MapNode *prev = m->buckets[index];
   MapNode *bucket = prev->next;
   while (bucket && bucket->key) {
-    if (!m->cmp(node->key, bucket->key, m->key_size))
+    if (m->cmp(node->key, node->key_size, bucket->key, bucket->key_size)
+        == 0)
       return MAP_ERR;
     prev = bucket;
     bucket = bucket->next;

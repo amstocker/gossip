@@ -1,9 +1,10 @@
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 
 #include "jsmn.h"
-#include "utils.h"
 #include "hash.h"
 #include "comparator.h"
 #include "map.h"
@@ -13,6 +14,7 @@
 
 typedef enum {
   JSON_OK,
+  JSON_PART,
   JSON_ERR
 } JsonStatus;
 
@@ -39,7 +41,6 @@ struct JsonVal {
   size_t size;
 
   char *key;
-  size_t key_size;
   MapNode node;
 };
 
@@ -63,4 +64,4 @@ JsonBuilder *json_builder_new ();
 JsonStatus json_builder_clear (JsonBuilder *b);
 JsonStatus json_builder_destroy (JsonBuilder *b);
 JsonStatus json_parse_src (JsonBuilder *b, char *src, size_t srclen);
-JsonVal *json_lookup (JsonBuilder *b, char *key, size_t keylen);
+JsonVal *json_lookup (JsonBuilder *b, char *key, size_t key_size);

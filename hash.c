@@ -8,7 +8,7 @@ uint32_t
 hash_fnv (void *key, size_t size)
 {
     uint32_t r = hash_seed;
-    uint8_t *p = key;
+    char *p = key;
     while (size--) {
         r ^= *p++;
         r *= 16777619;
@@ -21,12 +21,8 @@ uint32_t
 hash_djb2 (void *key, size_t size)
 {
     uint32_t r = hash_seed;
-    uint8_t *p = key;
-    while (*p &&
-           (size ?
-            (size_t) (p - (uint8_t*) key) < size
-             : 1))
-    {
+    char *p = key;
+    while (size--) {
         r = ((r << 5) + r) + *p++;
     }
     return r;
@@ -37,12 +33,8 @@ uint32_t
 hash_djb2_ic (void *key, size_t size)
 {
     uint32_t r = hash_seed;
-    uint8_t *p = key;
-    while (*p &&
-           (size ?
-            (size_t) (p - (uint8_t*) key) < size
-             : 1))
-    {
+    char *p = key;
+    while (size--) {
         r = ((r << 5) + r) + tolower(*p++);
     }
     return r;

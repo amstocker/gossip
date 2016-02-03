@@ -1,7 +1,9 @@
 #pragma once
+
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdint.h>
+
 #include "hash.h"
 #include "comparator.h"
 
@@ -20,6 +22,7 @@ typedef enum {
 
 typedef struct MapNode {
   void *key;
+  size_t key_size;
   uint32_t hash;
   struct MapNode *next;
 } MapNode;
@@ -30,7 +33,6 @@ typedef struct {
   MapNode **buckets;
   size_t node_offset;
   size_t key_offset;
-  size_t key_size;
   size_t nbuckets;
   size_t nelements;
 } Map;
@@ -40,8 +42,7 @@ typedef struct {
 #define MAP_HIGH_WATERMARK 0.9
 
 #define map_new(T, NODE, KEY) map_new_with_offsets(offsetof(T, NODE), \
-                                                 offsetof(T, KEY), \
-                                                 sizeof(((T*)0)->KEY))
+                                                 offsetof(T, KEY))
 
 #define string_map_new(T, NODE, KEY) string_map_new_with_offsets( \
                                                  offsetof(T, NODE), \
@@ -57,13 +58,13 @@ typedef struct {
 
 
 MapStatus map_node_init (MapNode *n);
-Map *map_new_with_offsets (size_t node_offset, size_t key_offset, size_t key_size);
+Map *map_new_with_offsets (size_t node_offset, size_t key_offset);
 Map *string_map_new_with_offsets (size_t node_offset, size_t key_offset);
 MapStatus map_free (Map *m);
 MapStatus map_free_all (Map *m, void (*_free) (void*));
-MapStatus map_add (Map *m, void *elem);
-void *map_get (Map *m, void *key);
-void *map_remove (Map *m, void *key);
+MapStatus map_add (Map *m, void *elem, size_t key_size);
+void *map_get (Map *m, void *key, size_t key_size);
+void *map_remove (Map *m, void *key, size_t key_size);
 MapStatus map_clear (Map *m);
 void **map_items (Map *m);
 void *map_head (Map *m);
