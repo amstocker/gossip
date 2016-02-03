@@ -136,10 +136,11 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     valtok = &b->tokens[i+1];
     
     // only accept key-value pairs with string keys and
-    // string or primitive values.
+    // string, primitive, or array values.
     if (keytok->type != JSMN_STRING ||
         (valtok->type != JSMN_STRING &&
-         valtok->type != JSMN_PRIMITIVE))
+         valtok->type != JSMN_PRIMITIVE &&
+         valtok->type != JSMN_ARRAY))
       goto error;
     
     val = p++;

@@ -21,6 +21,7 @@ typedef enum {
   JSON_STRING,
   JSON_DOUBLE,
   JSON_BOOL,
+  JSON_ARRAY,
   JSON_NULL
 } JsonValType;
 

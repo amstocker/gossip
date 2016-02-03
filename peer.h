@@ -24,9 +24,11 @@ typedef struct {
   uint32_t msg_last_hash;
 
   // rate limiting
-  float msg_rate;        // 30 second window
-  float msg_rate_burst;  // 1 second window
+  float msg_rate;
+  float msg_rate_burst;
 } Peer;
 
 
-Peer *peer_new_from_addr (struct sockaddr *addr);
+Peer *peer_new ();
+PeerStatus peer_set_name (Peer *p, const char *buf, size_t len);
+PeerStatus peer_set_addr (Peer *p, const struct sockaddr *addr);

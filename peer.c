@@ -2,15 +2,39 @@
 
 
 Peer*
-peer_new_from_addr (struct sockaddr *addr)
+peer_new ()
 {
-  Peer *p = calloc (1, sizeof(Peer));
+  Peer *p = calloc (1, sizeof (Peer));
   if (!p)
-    goto error;
+    return NULL;
 
-  p->addr = calloc (1, sizeof(struct sockaddr_storage));
-  if (!p->addr)
-    goto error;
+  uuid_generate_time_safe (p->id);
+  return p;
+}
+
+
+PeerStatus
+peer_set_name (Peer *p, const char *buf, size_t len)
+{
+  if (len > PEER_MAX_NAME_LEN)
+    return PEER_ERR;
+
+  memcpy(p->name, buf, len);
+  return PEER_OK;
+}
+
+
+PeerStatus
+peer_set_addr (Peer *p, const struct sockaddr *addr)
+{
+  if (p->addr)
+    free (p->addr);
+  
+  struct sockaddr *tmp = calloc (1, sizeof(struct sockaddr_storage));
+  if (!tmp)
+    return PEER_ERR;
+  p->addr = tmp;
+
   switch (addr->sa_family) {
     case AF_INET:
       memcpy (p->addr, addr, sizeof(struct sockaddr_in));
@@ -19,10 +43,5 @@ peer_new_from_addr (struct sockaddr *addr)
       memcpy (p->addr, addr, sizeof(struct sockaddr_in6));
   }
 
-  return p;
-
-error:
-  if (p)
-    free (p->addr);
-  return NULL;
+  return PEER_OK;
 }

@@ -13,6 +13,7 @@ void print_val_for (char *key)
 {
   JsonVal *val = json_lookup(j, key, strlen(key));
   switch (val->type) {
+    case JSON_ARRAY:
     case JSON_STRING:
       printf("%s: %.*s\n", key, (int) val->size, val->as_string);
       break;
