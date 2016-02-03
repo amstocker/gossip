@@ -5,8 +5,8 @@ gossip
 deps/include
 deps/build
 deps/src/jsmn/jsmn.o
-deps/src/libuv/libuv*/
-deps/src/leveldb/leveldb*/
+deps/src/libuv/libuv-*
+deps/src/leveldb/leveldb-*
 
 # backup files #
 *~
