@@ -1,10 +1,13 @@
 #include "utils.h"
 
 
-double
-utc_now ()
+uint64_t
+time_now ()
 {
   static struct timeval tv;
-  gettimeofday(&tv, NULL);
-  return (tv.tv_sec * (uint64_t) 1000000 + tv.tv_usec) / ((double) 1e6);
+
+  if (gettimeofday(&tv, NULL))
+    return 0;
+  return tv.tv_sec * (uint64_t) 1000
+         + tv.tv_usec / (uint64_t) 1000;
 }

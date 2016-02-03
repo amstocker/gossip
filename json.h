@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "utils.h"
 #include "thirdparty/jsmn.h"
-#include "collections/hash.h"
-#include "collections/comparator.h"
-#include "collections/map.h"
+#include "utils.h"
+#include "hash.h"
+#include "comparator.h"
+#include "map.h"
 
 
 #define JSON_MAX_TOKENS 256

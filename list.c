@@ -1,4 +1,4 @@
-#include "collections/list.h"
+#include "list.h"
 
 
 #define NODE_FROM_ELEM(L, E) ((E == (void*) L) \

@@ -1,4 +1,4 @@
-#include "collections/map.h"
+#include "map.h"
 
 
 #define SIZEUP(N) (((N) * 2) - 1)

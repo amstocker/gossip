@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "hash.h"
-#include "collections/comparator.h"
+#include "comparator.h"
 
 
 #define map_default_hash hash_fnv
