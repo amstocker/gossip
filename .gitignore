@@ -1,2 +1,4 @@
 deps/libuv/libuv*/
 deps/leveldb/leveldb*/
+gossip
+*.swp

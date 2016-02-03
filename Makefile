@@ -1,12 +1,12 @@
-## Config ##
+## Executables ##
 
 all: gossip
 
-LIBUV_VER = 1.8.0
-LEVELDB_VER = 1.18
-
 
 ## Dependencies ##
+
+LIBUV_VER = 1.8.0
+LEVELDB_VER = 1.18
 
 LIBUV_PATH = deps/libuv/libuv-$(LIBUV_VER)
 LEVELDB_PATH = deps/leveldb/leveldb-$(LEVELDB_VER)
