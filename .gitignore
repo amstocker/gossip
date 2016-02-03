@@ -2,9 +2,11 @@
 gossip
 
 # dependency builds #
-deps/jsmn/jsmn.o
-deps/libuv/libuv*/
-deps/leveldb/leveldb*/
+deps/include
+deps/build
+deps/src/jsmn/jsmn.o
+deps/src/libuv/libuv*/
+deps/src/leveldb/leveldb*/
 
 # backup files #
 *~
