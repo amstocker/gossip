@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <uv.h>
+#include "uv.h"
 #include <uuid/uuid.h>
 
 

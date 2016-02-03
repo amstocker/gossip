@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "thirdparty/jsmn.h"
+#include "jsmn.h"
 #include "utils.h"
 #include "hash.h"
 #include "comparator.h"
