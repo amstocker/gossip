@@ -1,4 +1,6 @@
-#include "peer.h"
+#include <string.h>
+
+#include "gossip.h"
 
 
 Peer*
@@ -13,18 +15,18 @@ peer_new ()
 }
 
 
-PeerStatus
+GStatus
 peer_set_name (Peer *p, const char *buf, size_t len)
 {
   if (len > PEER_MAX_NAME_LEN)
-    return PEER_ERR;
+    return G_ERR;
 
   memcpy(p->name, buf, len);
-  return PEER_OK;
+  return G_OK;
 }
 
 
-PeerStatus
+GStatus
 peer_set_addr (Peer *p, const struct sockaddr *addr)
 {
   if (p->addr)
@@ -32,7 +34,7 @@ peer_set_addr (Peer *p, const struct sockaddr *addr)
   
   struct sockaddr *tmp = calloc (1, sizeof(struct sockaddr_storage));
   if (!tmp)
-    return PEER_ERR;
+    return G_ERR;
   p->addr = tmp;
 
   switch (addr->sa_family) {
@@ -43,5 +45,5 @@ peer_set_addr (Peer *p, const struct sockaddr *addr)
       memcpy (p->addr, addr, sizeof(struct sockaddr_in6));
   }
 
-  return PEER_OK;
+  return G_OK;
 }

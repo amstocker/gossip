@@ -1,5 +1,4 @@
-#include "server.h"
-#include "event.h"
+#include "gossip.h"
 
 
 int main () {
@@ -7,7 +6,6 @@ int main () {
   server.loop = uv_default_loop ();
 
   event_init (&server);
-  event_start (&server);
 
   uv_run (server.loop, UV_RUN_DEFAULT);
 

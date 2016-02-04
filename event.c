@@ -1,4 +1,21 @@
-#include "event.h"
+#include "gossip.h"
+#include "utils/json.h"
+#include "utils/map.h"
+
+
+#define EVENT_MAX_KEYLEN 64
+
+// command string to handler func mapping
+typedef struct {
+  char key[EVENT_MAX_KEYLEN];
+  size_t keylen;
+  GStatus (*handler) (EventHandle *);
+  MapNode *node;
+} EventKey;
+
+Map *event_map;
+
+
 
 static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                            const struct sockaddr *addr, unsigned flags);
@@ -14,29 +31,23 @@ GStatus
 event_init (GServer *server)
 {
   EventHandle *handle = &server->event_handle;
+  int rc;
+  
   if ((handle->json = json_builder_new ())
       != JSON_OK)
-    return G_ERR;
-  
-  if (uv_udp_init (server->loop, (uv_udp_t *) handle)
-      != 0)
-    return G_ERR;
+    goto error;
 
-  return G_OK;
-}
+  rc = uv_udp_init (server->loop, (uv_udp_t *) handle);
+  if (rc < 0)
+    goto error;
 
-
-GStatus
-event_start (GServer *server)
-{
-  int rc;
-  rc = uv_udp_bind ((uv_udp_t *) &server->event_handle,
+  rc = uv_udp_bind ((uv_udp_t *) handle,
                     server->host,
                     UV_UDP_REUSEADDR);
   if (rc < 0)
     goto error;
 
-  rc = uv_udp_recv_start ((uv_udp_t *) &server->event_handle,
+  rc = uv_udp_recv_start ((uv_udp_t *) handle,
                           alloc_buffer,
                           libuv_handler);
   if (rc < 0)

@@ -58,6 +58,7 @@ LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)
 	$(CC) $(CFLAGS) \
+		-I. \
 		thirdparty/*.c utils/*.c *.c \
 		-o $@ \
 		$(DEPS_BUILD)/* $(LDFLAGS)
