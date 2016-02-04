@@ -18,16 +18,18 @@ NUMERIC_COMPARATOR(double)
 int
 comparator_bytes (void *lhs, size_t lsize, void *rhs, size_t rsize)
 {
-  int r = 0;
+  int cmp = 0;
+  uint8_t *l = (uint8_t *) lhs;
+  uint8_t *r = (uint8_t *) rhs;
   while (rsize--, lsize--) {
-    r += *(uint8_t*) lhs - *(uint8_t*) rhs;
-    lhs++; rhs++;
+    cmp += *l - *r;
+    l++; r++;
   }
   while (rsize--) {
-    r -= *(uint8_t*) rhs;
-    rhs++;
+    cmp -= *r;
+    r++;
   }
-  return r;
+  return cmp;
 }
 
 

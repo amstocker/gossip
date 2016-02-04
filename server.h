@@ -6,7 +6,6 @@
 #include "json.h"
 #include "map.h"
 #include "utils.h"
-#include "event.h"
 
 
 /* Configuration
@@ -45,10 +44,11 @@ typedef struct GServer GServer;
  *  the server.
  *
  */
+#define SERVER_FROM_EH(P) (container_of(P, GServer, event_handle))
+
 typedef struct {
   uv_udp_t req;
   JsonBuilder *json;
-  GServer *server;
 } EventHandle;
 
 

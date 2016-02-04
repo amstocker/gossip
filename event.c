@@ -5,11 +5,9 @@ static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
 static GStatus new_message_handler (EventHandle *event);
 
 
-
 static const EventKey event_keys[] = {
   { "M", 1, new_message_handler }
 };
-
 
 
 GStatus
@@ -24,8 +22,6 @@ event_init (GServer *server)
       != 0)
     return G_ERR;
 
-  // for getting server ptr from callback
-  handle->server = server;
   return G_OK;
 }
 

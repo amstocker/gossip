@@ -2,10 +2,10 @@
 
 #include "uv.h"
 
+#include "server.h"
 #include "utils.h"  /* alloc_buffer */
 #include "json.h"
 #include "error.h"
-#include "server.h"
 #include "map.h"
 
 #define EVENT_MAX_KEYLEN 64

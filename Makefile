@@ -51,7 +51,9 @@ DEPS = \
 	$(DEPS_BUILD)/libuv.a \
 	$(DEPS_BUILD)/libleveldb.a \
 
-CFLAGS = -std=c99 -Wall -D_GNU_SOURCE -DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
+CFLAGS = -std=c99 -Wall \
+				 -D_GNU_SOURCE \
+				 -DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
 LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)
