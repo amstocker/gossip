@@ -9,7 +9,20 @@
 static const JsonVal JSONVAL_UNDEFINED = {{0}};
 
 
-#include <stdio.h>
+static inline int
+comparator_token (void *lhs, size_t lsize, void *rhs, size_t rsize)
+{
+  return comparator_string_ic (*(char **) lhs, lsize,
+                               *(char **) rhs, rsize);
+}
+
+static inline uint32_t
+hash_token (void *key, size_t key_size)
+{
+  return hash_djb2_ic (*(char **) key, key_size);
+}
+
+
 JsonBuilder*
 json_builder_new ()
 {
@@ -21,8 +34,8 @@ json_builder_new ()
   
   if (!b->keymap)
     goto error;
-  b->keymap->hash = hash_djb2_ic;
-  b->keymap->cmp = comparator_string_ic;
+  b->keymap->hash = hash_token;
+  b->keymap->cmp = comparator_token;
 
   jsmn_init (&b->parser);
   b->toklen = JSON_MAX_TOKENS;
@@ -37,7 +50,6 @@ json_builder_new ()
   return b;
 
 error:
-  printf("json builder new error!\n");
   json_builder_destroy (b);
   return NULL;
 }
@@ -103,11 +115,8 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
       goto error;
 
     val = p++;
-    val->key = &src[keytok->start];
-    printf("json key addr: %p\n", val->key);
-    printf("json key: %.*s\n", (int) TOKSIZE(keytok), val->key);
+    val->key = &(src[keytok->start]);
     val->size = TOKSIZE(valtok);
-    printf("json: elem=%p node=%p key=%p\n", val, &val->node, val->key);
 
     // parse type of value.
     char *start = &src[valtok->start];
@@ -115,7 +124,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
       case JSMN_STRING:
         val->as_string = start;
         val->type = JSON_STRING;
-    printf("json: elem=%p node=%p key=%p\n", val, &val->node, val->key);
         break;
       case JSMN_PRIMITIVE:
         // parse primitive from first char
@@ -126,7 +134,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
             if (sscanf(start, "%lf", &val->as_double) < 1)
               goto error;
             val->type = JSON_DOUBLE;
-    printf("json: elem=%p node=%p key=%p\n", val, &val->node, val->key);
             break;
           case 't':
             // 'true'
@@ -152,7 +159,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     //if (map_get (b->keymap, val->key, TOKSIZE(keytok)))
     //  continue;
 
-    printf("json: elem=%p node=%p key=%p\n", val, &val->node, val->key);
     if (map_add (b->keymap, val, TOKSIZE(keytok)) != MAP_OK)
       goto error;
   }
@@ -160,7 +166,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
   return JSON_OK;
 
 error:
-  printf("JSON PARSE ERROR!\n");
   json_builder_clear (b);
   return JSON_ERR;
 }
@@ -170,7 +175,7 @@ JsonVal*
 json_lookup (JsonBuilder *b, char *key, size_t key_size)
 {
   JsonVal *val;
-  return (val = map_get(b->keymap, key, key_size))
+  return (val = map_get(b->keymap, &key, key_size))
          ? val
          : (JsonVal *) &JSONVAL_UNDEFINED;
 }

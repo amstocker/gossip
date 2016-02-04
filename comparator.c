@@ -52,12 +52,10 @@ comparator_string (void *lhs, size_t lsize, void *rhs, size_t rsize)
 }
 
 
-#include <stdio.h>
 int
 comparator_string_ic (void *lhs, size_t lsize, void *rhs, size_t rsize)
 {
   int cmp = strncasecmp((char*) lhs, (char*) rhs, MIN(lsize, rsize));
-  printf("comparator_string_ic: cmp = %i\n", cmp);
 
   if (cmp == 0 && lsize != rsize)
     return lsize - rsize;

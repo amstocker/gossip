@@ -93,17 +93,14 @@ map_clear (Map *m)
 }
 
 
-#include <stdio.h>
 MapStatus
 map_add (Map *m, void *elem, size_t key_size)
 {
   MapNode *node = NODE(m, elem);
   node->key = KEY(m, elem);
   node->key_size = key_size;
-  printf("map_add: elem=%p node=%p key=%p\n", elem, node, node->key);
   if (!node->key)
     return MAP_ERR;
-  printf("map_add: (%p) %.*s\n", node->key, (int) key_size, (char *) node->key);
   node->hash = HASH(m, node->key, node->key_size);
   if (maybe_rehash(m) == MAP_ERR)
     return MAP_ERR;
@@ -114,17 +111,14 @@ map_add (Map *m, void *elem, size_t key_size)
 void*
 map_get (Map *m, void *key, size_t key_size)
 {
-  printf("map_get: %.*s\n", (int) key_size, (char *) key);
   uint32_t index = HASH(m, key, key_size) % m->nbuckets;
   MapNode *bucket = m->buckets[index]->next;
   while (bucket && bucket->key) {
-    printf("map_get: testing bucket: %.*s", (int) bucket->key_size, (char *) bucket->key);
     if (m->cmp(key, key_size, bucket->key, bucket->key_size)
         == 0)
       return ELEM(m, bucket);
     bucket = bucket->next;
   }
-  printf("map_get: returning null\n");
   return NULL;
 }
 
@@ -213,7 +207,6 @@ free_anchors (MapNode **buckets, size_t size)
 static MapStatus
 add_node (Map *m, MapNode *node)
 {
-  printf("add_node: key=%.*s\n", (int) node->key_size, (char *) node->key);
   size_t index = node->hash % m->nbuckets;
   MapNode *prev = m->buckets[index];
   MapNode *bucket = prev->next;

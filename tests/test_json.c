@@ -36,9 +36,7 @@ void print_val_for (char *key)
 int main() {
   j = json_builder_new();
 
-  printf("main: parsing json string (%p)\n\t%s\n", JSON_SRC, JSON_SRC);  
   json_parse_src(j, JSON_SRC, strlen(JSON_SRC));
-  printf("main: parsing OK\n");
 
   print_val_for("andrew");
   print_val_for("rules?");
