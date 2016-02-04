@@ -6,7 +6,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "utils.h"
+#include "utils/macros.h"
 
 
 typedef int (*Comparator) (void *lhs, size_t lsize, void *rhs, size_t rsize);

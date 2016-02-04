@@ -57,8 +57,8 @@ CFLAGS = -std=c99 -Wall \
 LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)
-	$(CC) $(CFLAGS) -I $(DEPS_INCLUDE) \
-		thirdparty/*.c *.c \
+	$(CC) $(CFLAGS) \
+		thirdparty/*.c utils/*.c *.c \
 		-o $@ \
 		$(DEPS_BUILD)/* $(LDFLAGS)
 

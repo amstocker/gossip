@@ -1,4 +1,4 @@
-#include "hash.h"
+#include "utils/hash.h"
 
 #define ROT32(x, y) ((x << y) | (x >> (32 - y)))
 static const uint32_t hash_seed = 5381;

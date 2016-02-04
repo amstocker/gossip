@@ -1,11 +1,17 @@
 #pragma once
 
 #include <stdlib.h>
-#include "uv.h"
+#include "deps/include/uv.h"
 
-#include "json.h"
-#include "map.h"
-#include "utils.h"
+#include "utils/json.h"
+#include "utils/map.h"
+#include "utils/macros.h"
+
+
+typedef enum {
+  G_OK,
+  G_ERR
+} GStatus;
 
 
 /* Configuration

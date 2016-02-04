@@ -5,9 +5,9 @@
 #include <stddef.h>
 
 #include "thirdparty/jsmn.h"
-#include "hash.h"
-#include "comparator.h"
-#include "map.h"
+#include "utils/hash.h"
+#include "utils/comparator.h"
+#include "utils/map.h"
 
 
 #define JSON_MAX_TOKENS 256

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "uv.h"
+#include "deps/include/uv.h"
 
 #include "server.h"
 #include "utils.h"  /* alloc_buffer */

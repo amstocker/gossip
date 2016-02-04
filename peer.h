@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "uv.h"
+#include "deps/include/uv.h"
 #include <uuid/uuid.h>
 
 
