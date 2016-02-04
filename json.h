@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 
-#include "jsmn.h"
+#include "thirdparty/jsmn.h"
 #include "hash.h"
 #include "comparator.h"
 #include "map.h"
