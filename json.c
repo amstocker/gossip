@@ -118,6 +118,10 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     val->key = &src[keytok->start];
     val->size = TOKSIZE(valtok);
 
+    // check for duplicate keys
+    if (map_get (b->keymap, &val->key, TOKSIZE(keytok)))
+      goto error;
+
     // parse type of value.
     char *start = &src[valtok->start];
     switch (valtok->type) {
@@ -155,9 +159,6 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
       default:
         goto error;
     }
-
-    if (map_get (b->keymap, &val->key, TOKSIZE(keytok)))
-      continue;
 
     if (map_add (b->keymap, val, TOKSIZE(keytok)) != MAP_OK)
       goto error;
