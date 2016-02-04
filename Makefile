@@ -52,12 +52,13 @@ DEPS = \
 	$(DEPS_BUILD)/libleveldb.a \
 
 CFLAGS = -std=c99 -Wall -D_GNU_SOURCE -DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
-LDFLAGS = -luuid
+LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)
 	$(CC) $(CFLAGS) -I $(DEPS_INCLUDE) \
-		$(DEPS_BUILD)/* thirdparty/*.c *.c \
-		-o $@ $(LDFLAGS)
+		thirdparty/*.c *.c \
+		-o $@ \
+		$(DEPS_BUILD)/* $(LDFLAGS)
 
 
 ## Tests ##
@@ -75,7 +76,7 @@ test-json: $(DEPS)
 
 clean:
 	$(RM) gossip
-	$(RM) test-*
+	$(RM) __test*
 
 deep-clean: clean
 	$(RM) -r $(DEPS_INCLUDE)

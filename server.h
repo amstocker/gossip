@@ -34,15 +34,31 @@ static const int default_ratelim_burst_window = 1000 /* ms */;
 static const float default_ratelim = 500.0;
 static const float default_ratelim_burst = 50.0;
 
+typedef struct GServer GServer;
 
+
+/* EventHandle
+ * -----------
+ *
+ *  Subclass of uv_udp_t that represents a single event at any one
+ *  point in time.  For now there exists just one instance as part of
+ *  the server.
+ *
+ */
 typedef struct {
+  uv_udp_t req;
+  JsonBuilder *json;
+  GServer *server;
+} EventHandle;
+
+
+struct GServer {
 
   uv_loop_t *loop;
 
   // config
   struct sockaddr *host;
   char *username;
-  char *peers[];
   int retries;
   int retry_wait;
   int ratelim_window;
@@ -50,11 +66,11 @@ typedef struct {
   float ratelim;
   float ratelim_burst;
 
-  // sockets
+  // handles
   EventHandle event_handle;
   //ApiHandle api_handle;
   uv_pipe_t apisock;
 
-  Map *peer_idmap;
+  Map *peers;
 
-} GServer;
+};

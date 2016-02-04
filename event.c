@@ -1,27 +1,31 @@
 #include "event.h"
 
-
 static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                            const struct sockaddr *addr, unsigned flags);
+static GStatus new_message_handler (EventHandle *event);
 
-static EventKey[] event_keys = {
-  
+
+
+static const EventKey event_keys[] = {
+  { "M", 1, new_message_handler }
 };
+
 
 
 GStatus
 event_init (GServer *server)
 {
-  if ((server->event_handle->json = json_builder_new ())
+  EventHandle *handle = &server->event_handle;
+  if ((handle->json = json_builder_new ())
       != JSON_OK)
     return G_ERR;
   
-  if (uv_udp_init (server->loop, (uv_udp_t *) &server->event_handle)
+  if (uv_udp_init (server->loop, (uv_udp_t *) handle)
       != 0)
     return G_ERR;
 
   // for getting server ptr from callback
-  server.event_handle.server = server;
+  handle->server = server;
   return G_OK;
 }
 
@@ -78,9 +82,17 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
     if (val->type != JSON_STRING)
       goto done;
 
-    EventKey *key = map_get (event_map, 
+    EventKey *key = map_get (event_map, val->as_string, val->size);
+    key->handler (event);
   }
 
 done:
   free (buf->base);
+}
+
+
+static GStatus
+new_message_handler (EventHandle *event)
+{
+  return G_OK;
 }
