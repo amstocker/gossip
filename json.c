@@ -156,8 +156,8 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         goto error;
     }
 
-    //if (map_get (b->keymap, val->key, TOKSIZE(keytok)))
-    //  continue;
+    if (map_get (b->keymap, val->key, TOKSIZE(keytok)))
+      continue;
 
     if (map_add (b->keymap, val, TOKSIZE(keytok)) != MAP_OK)
       goto error;
