@@ -37,6 +37,11 @@ server_run (Server *server)
   printf ("server run ...\n");
   int rc;
 
+  printf ("event start ...\n");
+  rc = event_start (server);
+  if (rc < 0)
+    goto error;
+
   printf ("uv run ...\n");
   rc = uv_run (server->loop, UV_RUN_DEFAULT);
   if (rc < 0)

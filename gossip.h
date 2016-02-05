@@ -10,10 +10,10 @@
 
 
 // DEBUG
-#define DEBUG 1
-#ifdef DEBUG
 #include <stdio.h>
-#endif
+
+
+typedef struct Server Server;
 
 
 /* Configuration
@@ -42,20 +42,22 @@ static const float default_ratelim = 500.0;
 static const float default_ratelim_burst = 50.0;
 
 
+/* Global Error Codes
+ * ------------------
+ *
+ */
 
 typedef enum {
   G_OK  =  0,
   G_ERR = -1
 } Status;
 
-typedef struct Server Server;
-
 
 
 /* Buffer (buffer.c)
  * -----------------
  *
- * Handle buffer allocations.  Possible optimize this?
+ * Handle buffer allocations.
  *
  */
 
@@ -65,7 +67,6 @@ void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
 
 /* Peer (peer.c)
  * -------------
- *
  *
  */
 
@@ -94,9 +95,9 @@ Status peer_set_addr (Peer *p, const struct sockaddr *addr);
 /* EventHandle (event.c)
  * ---------------------
  *
- *  Subclass of uv_udp_t that represents a single event at any one
- *  point in time.  For now there exists just one instance as part of
- *  the server.
+ * Subclass of uv_udp_t that represents a single event at any one
+ * point in time.  For now there exists just one instance as part of
+ * the server.
  *
  */
 
@@ -108,6 +109,7 @@ typedef struct {
 } EventHandle;
 
 Status event_init (Server *server);
+Status event_start (Server *server);
 
 
 
@@ -141,8 +143,8 @@ Status api_init (Server *server);
 /* Server (server.c)
  * -----------------
  *
- *
  */
+
 struct Server {
 
   uv_loop_t *loop;

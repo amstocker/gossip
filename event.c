@@ -78,6 +78,7 @@ static void
 libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags)
 {
+  printf ("event libuv handler ...\n");
   EventHandle *event = (EventHandle *) req;
 
   if (nread < 0) {
@@ -102,8 +103,10 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
     if (val->type != JSON_STRING)
       goto done;
 
+    // get proper handler and handle event
     EventKey *key = map_get (event_map, val->as_string, val->size);
-    key->handler (event);
+    if (key)
+      key->handler (event);
   }
 
 done:
