@@ -92,8 +92,8 @@ Status peer_set_addr (Peer *p, const struct sockaddr *addr);
 
 
 
-/* EventHandle (event.c)
- * ---------------------
+/* Event (event.c)
+ * ---------------
  *
  * Subclass of uv_udp_t that represents a single event at any one
  * point in time.  For now there exists just one instance as part of

@@ -1,30 +1,13 @@
 #include "gossip.h"
+#include "event_map.h"
 #include "utils/json.h"
-#include "utils/map.h"
 
 
-#define EVENT_MAX_KEYLEN 64
-
-// command string to handler func mapping
-typedef struct {
-  char key[EVENT_MAX_KEYLEN];
-  size_t keylen;
-  Status (*handler) (EventHandle *);
-  MapNode *node;
-} EventKey;
-
-Map *event_map;
-
-
-
-static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
-                           const struct sockaddr *addr, unsigned flags);
-static Status new_message_handler (EventHandle *event);
-
-
-static const EventKey event_keys[] = {
-  { "M", 1, new_message_handler }
-};
+static void libuv_handler (uv_udp_t *req,
+                           ssize_t nread,
+                           const uv_buf_t *buf,
+                           const struct sockaddr *addr,
+                           unsigned flags);
 
 
 Status
@@ -32,6 +15,10 @@ event_init (Server *server)
 {
   EventHandle *handle = &server->event_handle;
   int rc;
+
+  rc = event_map_init ();
+  if (rc < 0)
+    goto error;
 
   handle->json = json_builder_new ();
   if (!handle->json)
@@ -78,8 +65,8 @@ static void
 libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags)
 {
-  printf ("event libuv handler ...\n");
   EventHandle *event = (EventHandle *) req;
+  EventHandler handler;
 
   if (nread < 0) {
     // TODO: log error
@@ -104,18 +91,11 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
       goto done;
 
     // get proper handler and handle event
-    EventKey *key = map_get (event_map, val->as_string, val->size);
-    if (key)
-      key->handler (event);
+    handler = event_get_handler (val->as_string, val->size);
+    if (handler)
+      handler (event);
   }
 
 done:
   free (buf->base);
-}
-
-
-static Status
-new_message_handler (EventHandle *event)
-{
-  return G_OK;
 }

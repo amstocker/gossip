@@ -93,12 +93,22 @@ map_clear (Map *m)
 }
 
 
+#include <stdio.h>
 MapStatus
 map_add (Map *m, void *elem, size_t key_size)
 {
+  printf("map add: elem = %p\n", elem);
   MapNode *node = NODE(m, elem);
+  printf("map add: node = %p\n", node);
+  fflush(stdout);
+  void *tmp = KEY(m, elem);
+  printf("map add: key = %p\n", tmp);
   node->key = KEY(m, elem);
+  printf("map add: key = %p\n", node->key);
+  fflush(stdout);
   node->key_size = key_size;
+  printf("map add: \"%.*s\"\n", (int) key_size, (char *) node->key);
+  fflush(stdout);
   if (!node->key)
     return MAP_ERR;
   node->hash = HASH(m, node->key, node->key_size);
