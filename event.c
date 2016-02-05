@@ -9,7 +9,7 @@
 typedef struct {
   char key[EVENT_MAX_KEYLEN];
   size_t keylen;
-  GStatus (*handler) (EventHandle *);
+  Status (*handler) (EventHandle *);
   MapNode *node;
 } EventKey;
 
@@ -19,7 +19,7 @@ Map *event_map;
 
 static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                            const struct sockaddr *addr, unsigned flags);
-static GStatus new_message_handler (EventHandle *event);
+static Status new_message_handler (EventHandle *event);
 
 
 static const EventKey event_keys[] = {
@@ -27,14 +27,14 @@ static const EventKey event_keys[] = {
 };
 
 
-GStatus
-event_init (GServer *server)
+Status
+event_init (Server *server)
 {
   EventHandle *handle = &server->event_handle;
   int rc;
-  
-  if ((handle->json = json_builder_new ())
-      != JSON_OK)
+
+  handle->json = json_builder_new ();
+  if (!handle->json)
     goto error;
 
   rc = uv_udp_init (server->loop, (uv_udp_t *) handle);
@@ -47,8 +47,22 @@ event_init (GServer *server)
   if (rc < 0)
     goto error;
 
+  return G_OK;
+
+error:
+  // TODO: handle libuv error codes properly
+  return G_ERR;
+}
+
+
+Status
+event_start (Server *server)
+{
+  EventHandle *handle  = &server->event_handle;
+  int rc;
+
   rc = uv_udp_recv_start ((uv_udp_t *) handle,
-                          alloc_buffer,
+                          buffer_allocate,
                           libuv_handler);
   if (rc < 0)
     goto error;
@@ -56,7 +70,6 @@ event_init (GServer *server)
   return G_OK;
 
 error:
-  // TODO: handle libuv error codes properly
   return G_ERR;
 }
 
@@ -98,7 +111,7 @@ done:
 }
 
 
-static GStatus
+static Status
 new_message_handler (EventHandle *event)
 {
   return G_OK;

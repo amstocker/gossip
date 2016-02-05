@@ -9,6 +9,12 @@
 #include "utils/macros.h"
 
 
+// DEBUG
+#define DEBUG 1
+#ifdef DEBUG
+#include <stdio.h>
+#endif
+
 
 /* Configuration
  * -------------
@@ -38,16 +44,27 @@ static const float default_ratelim_burst = 50.0;
 
 
 typedef enum {
-  G_OK,
-  G_ERR
-} GStatus;
+  G_OK  =  0,
+  G_ERR = -1
+} Status;
 
-typedef struct GServer GServer;
+typedef struct Server Server;
 
 
 
-/* Peer
- * ----
+/* Buffer (buffer.c)
+ * -----------------
+ *
+ * Handle buffer allocations.  Possible optimize this?
+ *
+ */
+
+void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
+
+
+
+/* Peer (peer.c)
+ * -------------
  *
  *
  */
@@ -69,13 +86,13 @@ typedef struct {
 } Peer;
 
 Peer *peer_new ();
-GStatus peer_set_name (Peer *p, const char *buf, size_t len);
-GStatus peer_set_addr (Peer *p, const struct sockaddr *addr);
+Status peer_set_name (Peer *p, const char *buf, size_t len);
+Status peer_set_addr (Peer *p, const struct sockaddr *addr);
 
 
 
-/* EventHandle
- * -----------
+/* EventHandle (event.c)
+ * ---------------------
  *
  *  Subclass of uv_udp_t that represents a single event at any one
  *  point in time.  For now there exists just one instance as part of
@@ -90,12 +107,12 @@ typedef struct {
   JsonBuilder *json;
 } EventHandle;
 
-GStatus event_init (GServer *server);
+Status event_init (Server *server);
 
 
 
-/* Api
- * ---
+/* Api (api.c)
+ * -----------
  *
  * Send commands varint-length-prefixed like so:
  *
@@ -117,16 +134,16 @@ typedef struct {
   // ...
 } ApiHandle;
 
-GStatus api_init (GServer *server);
+Status api_init (Server *server);
 
 
 
-/* Server
- * ------
+/* Server (server.c)
+ * -----------------
  *
  *
  */
-struct GServer {
+struct Server {
 
   uv_loop_t *loop;
 
@@ -146,3 +163,6 @@ struct GServer {
   EventHandle event_handle;
   ApiHandle api_handle;
 };
+
+Status server_init (Server *server);
+Status server_run (Server *server);

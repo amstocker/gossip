@@ -13,9 +13,9 @@
 #define JSON_MAX_TOKENS 256
 
 typedef enum {
-  JSON_OK,
-  JSON_PART,
-  JSON_ERR
+  JSON_OK   =  0,
+  JSON_PART =  1,
+  JSON_ERR  = -1
 } JsonStatus;
 
 typedef enum {

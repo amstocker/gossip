@@ -15,7 +15,7 @@ peer_new ()
 }
 
 
-GStatus
+Status
 peer_set_name (Peer *p, const char *buf, size_t len)
 {
   if (len > PEER_MAX_NAME_LEN)
@@ -26,7 +26,7 @@ peer_set_name (Peer *p, const char *buf, size_t len)
 }
 
 
-GStatus
+Status
 peer_set_addr (Peer *p, const struct sockaddr *addr)
 {
   if (p->addr)
