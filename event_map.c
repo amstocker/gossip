@@ -3,8 +3,8 @@
 
 static Map *event_map = NULL;
 
-static const EventKey event_keys[] = {
-  { "message", 7, event_message_handler }
+static EventKey event_keys[] = {
+  { "message", 7, message_event_handler }
 };
 
 
@@ -15,15 +15,17 @@ event_map_init ()
   if (!event_map)
     return G_ERR;
   
-  printf ("event map init ...\n");
   size_t i = sizeof (event_keys) / sizeof (EventKey);
-  printf ("nevents: %lu\n", i);
-  while (i--) {
-    printf("event map add: %.*s\n", (int) event_keys[i].key_size, event_keys[i].key);
-    printf("event map addrs: struct=%p, key=%p, ks=%p, eh=%p, node=%p\n", &event_keys[i], &event_keys[i].key, &event_keys[i].key_size, &event_keys[i].handler, &event_keys[i].node);
-    map_add (event_map, (void *) &event_keys[i], event_keys[i].key_size);
-  }
+  while (i--)
+    if (map_add (event_map, &event_keys[i], event_keys[i].key_size)
+        != MAP_OK)
+      goto error;
+  
   return G_OK;
+
+error:
+  map_free (event_map);
+  return G_ERR;
 }
 
 

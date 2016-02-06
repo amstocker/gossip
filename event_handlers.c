@@ -2,7 +2,7 @@
 
 
 Status
-event_message_handler (EventHandle *event)
+message_event_handler (EventHandle *event)
 {
   return G_OK;
 }

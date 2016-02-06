@@ -16,8 +16,8 @@
 
 
 typedef enum {
-  MAP_OK,
-  MAP_ERR
+  MAP_OK  =  0,
+  MAP_ERR = -1
 } MapStatus;
 
 typedef struct MapNode {

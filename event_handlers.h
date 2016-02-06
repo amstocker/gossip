@@ -3,5 +3,5 @@
 
 typedef Status (*EventHandler) (EventHandle *event);
 
-// event_X_handler
-Status event_message_handler (EventHandle *event);
+// X_event_handler
+Status message_event_handler (EventHandle *event);
