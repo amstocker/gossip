@@ -17,7 +17,6 @@ send_message (const char *msg, size_t len)
 {
   uv_loop_t *loop = uv_default_loop ();
   uv_udp_t socket;
-
   int rc;
 
   rc = uv_udp_init (loop, &socket);

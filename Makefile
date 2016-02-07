@@ -78,9 +78,9 @@ test-message-event: $(DEPS) gossip
 	@sh tests/test_daemon_start.sh
 	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
-	@echo "=====test output:"
+	@echo "================================test output:"
 	@./__$@
-	@echo "================="
+	@echo "==========================================="
 	@$(RM) __$@
 	@echo "stopping test daemon ..."
 	@sh tests/test_daemon_stop.sh
