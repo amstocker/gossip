@@ -101,7 +101,7 @@ Status peer_set_addr (Peer *p, const struct sockaddr *addr);
  *
  */
 
-#define SERVER_FROM_EVENT(P) (container_of(P, GServer, event_handle))
+#define SERVER_FROM_EVENT(P) (container_of(P, Server, event))
 
 typedef struct {
   uv_udp_t req;
@@ -129,12 +129,12 @@ Status event_start (Server *server);
  *
  */
 
-#define SERVER_FROM_API(P) (container_of(P, GServer, api_handle))
+#define SERVER_FROM_API(P) (container_of(P, Server, api))
 
 typedef struct {
   uv_pipe_t req;
   // ...
-} ApiHandle;
+} Api;
 
 Status api_init (Server *server);
 
@@ -163,7 +163,7 @@ struct Server {
   
   // handles
   Event event;
-  ApiHandle api_handle;
+  Api api;
 };
 
 Status server_init (Server *server);

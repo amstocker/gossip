@@ -5,7 +5,7 @@
  * -----------------
  * 
  * The udp callback will match the EventHandler with the value in the "event"
- * field in the json send to the server.
+ * field in the json sent to the server.
  *
  */
 typedef Status (*EventHandler) (Event *event);
