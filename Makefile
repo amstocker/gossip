@@ -68,14 +68,20 @@ gossip: $(DEPS)
 ## Tests ##
 
 test-json: $(DEPS)
-	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_json.c -o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
-	@./__$@
-	@$(RM) __$@
+	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json.c -o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
+	./__$@
+	$(RM) __$@
 
-test-message-event: $(DEPS)
+test-message-event: $(DEPS) gossip
+	@echo "starting test daemon ..."
+	@sh tests/test_daemon_start.sh
 	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_message_event.c -o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
+	@echo "=====test output:"
 	@./__$@
+	@echo "================="
 	@$(RM) __$@
+	@echo "stopping test daemon ..."
+	@sh tests/test_daemon_stop.sh
 
 
 ## Clean ##
