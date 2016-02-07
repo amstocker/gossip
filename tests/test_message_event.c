@@ -5,5 +5,5 @@ const char *JSON = "{\"event\": \"message\", \"body\": \"hello server\"}";
 
 int main ()
 {
-  return send_message ("127.0.0.1", 9670, JSON, strlen(JSON));
+  return send_message (default_host_ip, default_host_port, JSON, strlen(JSON));
 }

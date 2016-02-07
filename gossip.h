@@ -27,7 +27,7 @@ typedef struct Server Server;
  *  - logfile?
  *
  */
-static const char *default_host_ip = "0.0.0.0";
+static const char *default_host_ip = "127.0.0.1";
 static const short default_host_port = 9670;
 
 static const char *default_unix = "/tmp/gossip.sock";
