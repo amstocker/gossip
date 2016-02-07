@@ -11,7 +11,7 @@
 typedef Status (*EventHandler) (Event *event);
 
 #define EVENT_MAP \
-  { "message", 7, message_event_handler }
+  { "message"  , 7       , message_event_handler    }
 
 
 // X_event_handler
