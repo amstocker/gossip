@@ -5,30 +5,22 @@
 
 
 static Map *event_map = NULL;
-static void event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
-                      const struct sockaddr *addr, unsigned flags);
 
-
-/* Event Handler Map
- * -----------------
- * 
- * The udp callback will match the EventHandler with the value in the "event"
- * field in the json send to the server.
- *
- */
 typedef struct {
-  char key[64];
+  char   key[64];
   size_t key_size;
   EventHandler handler;
-  
-  // for internal use by utils/map
   MapNode node;
 } EventKey;
 
 static EventKey event_keys[] = {
-  { "message", 7, message_event_handler }
+  // defined in event_handlers.h
+  EVENT_MAP
 };
 
+
+static void event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
+                      const struct sockaddr *addr, unsigned flags);
 
 
 Status
