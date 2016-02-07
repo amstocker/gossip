@@ -3,11 +3,8 @@
 #include "utils/json.h"
 
 
-static void libuv_handler (uv_udp_t *req,
-                           ssize_t nread,
-                           const uv_buf_t *buf,
-                           const struct sockaddr *addr,
-                           unsigned flags);
+static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
+                           const struct sockaddr *addr, unsigned flags);
 
 
 Status
@@ -28,9 +25,7 @@ event_init (Server *server)
   if (rc < 0)
     goto error;
 
-  rc = uv_udp_bind ((uv_udp_t *) handle,
-                    server->host,
-                    UV_UDP_REUSEADDR);
+  rc = uv_udp_bind ((uv_udp_t *) handle, server->host, UV_UDP_REUSEADDR);
   if (rc < 0)
     goto error;
 
@@ -48,9 +43,7 @@ event_start (Server *server)
   EventHandle *handle  = &server->event_handle;
   int rc;
 
-  rc = uv_udp_recv_start ((uv_udp_t *) handle,
-                          buffer_allocate,
-                          libuv_handler);
+  rc = uv_udp_recv_start ((uv_udp_t *) handle, buffer_allocate, libuv_handler);
   if (rc < 0)
     goto error;
 
@@ -68,7 +61,7 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
   EventHandle *event = (EventHandle *) req;
   EventHandler handler;
 
-  printf ("libuv_handler: nread=%lu, buf=\"%.*s\"\n", nread, (int) buf->len, buf->base);
+  printf ("libuv_handler: nread=%lu, buf=%.*s\n", nread, (int) buf->len, buf->base);
 
   if (nread < 0) {
     // TODO: log error
@@ -95,6 +88,7 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
     // get proper handler and handle event
     handler = event_get_handler (val->as_string, val->size);
     if (handler)
+      // TODO: handle errors from handler?
       handler (event);
   }
 

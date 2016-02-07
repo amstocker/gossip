@@ -9,13 +9,8 @@ const char *JSON = "{\"event\": \"message\", \"body\":\"hello server\"}";
 uv_buf_t make_buf ()
 {
   uv_buf_t buf;
-
-  printf ("allocating buffer ...\n");
   buffer_allocate (NULL, 256, &buf);
-
-  printf ("copying JSON string to buffer ...\n");
   memcpy (buf.base, JSON, strlen(JSON) + 1);
-
   return buf;
 }
 
@@ -31,7 +26,6 @@ int main() {
   if (rc < 0)
     goto error;
 
-  printf ("binding socket ...\n");
   struct sockaddr_in addr;
   uv_ip4_addr ("0.0.0.0", 9669, &addr);
   rc = uv_udp_bind (&socket, (const struct sockaddr *) &addr, UV_UDP_REUSEADDR);  
@@ -42,18 +36,15 @@ int main() {
   struct sockaddr_in sendaddr;
   uv_ip4_addr ("127.0.0.1", 9670, &sendaddr);
 
-  printf ("making buffer ...\n");
   uv_buf_t buf = make_buf();
-  
-  printf ("submitting request to libuv ...\n");
   rc = uv_udp_send (&req, &socket, &buf, 1, (const struct sockaddr *) &sendaddr, NULL);
   if (rc < 0)
     goto error;
 
-  printf ("send success!\n");
+  printf ("test message event: send success!\n");
   return 0;
 
 error:
-  printf ("test message event ERR!\n");
+  printf ("test message event: ERR!\n");
   return 1;
 }
