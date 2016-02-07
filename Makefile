@@ -75,6 +75,13 @@ test-json: $(DEPS)
 	@./__$@
 	@$(RM) __$@
 
+test-message-event: $(DEPS) gossip
+	@$(CC) $(CFLAGS) -I. -I $(DEPS_INCLUDE) $(DEPS_BUILD)/* \
+		tests/test_message_event.c \
+		-o __$@ $(LDFLAGS)
+	@./__$@
+	@$(RM) __$@
+
 
 ## Clean ##
 
