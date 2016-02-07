@@ -68,6 +68,8 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
   EventHandle *event = (EventHandle *) req;
   EventHandler handler;
 
+  printf ("libuv_handler: nread=%lu, buf=\"%.*s\"\n", nread, (int) buf->len, buf->base);
+
   if (nread < 0) {
     // TODO: log error
     uv_close ((uv_handle_t *) req, NULL);

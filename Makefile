@@ -51,6 +51,10 @@ DEPS = \
 	$(DEPS_BUILD)/libuv.a \
 	$(DEPS_BUILD)/libleveldb.a \
 
+SRC = $(filter-out gossip.c, $(wildcard *.c)) \
+			$(wildcard thirdparty/*.c) \
+			$(wildcard utils/*.c)
+
 CFLAGS = -std=c99 \
 				 -Wall -Wno-unused-variable \
 				 -D_GNU_SOURCE \
@@ -58,27 +62,18 @@ CFLAGS = -std=c99 \
 LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)
-	$(CC) $(CFLAGS) \
-		-I. \
-		thirdparty/*.c utils/*.c *.c \
-		-o $@ \
-		$(DEPS_BUILD)/* $(LDFLAGS)
+	$(CC) $(CFLAGS) -I. $(SRC) gossip.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
 
 
 ## Tests ##
 
 test-json: $(DEPS)
-	@$(CC) $(CFLAGS) -I. -I $(DEPS_INCLUDE) $(DEPS_BUILD)/* \
-		hash.c comparator.c utils.c map.c json.c thirdparty/jsmn.c \
-		tests/test_json.c \
-		-o __$@ $(LDFLAGS)
+	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_json.c -o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	@./__$@
 	@$(RM) __$@
 
-test-message-event: $(DEPS) gossip
-	@$(CC) $(CFLAGS) -I. -I $(DEPS_INCLUDE) $(DEPS_BUILD)/* \
-		tests/test_message_event.c \
-		-o __$@ $(LDFLAGS)
+test-message-event: $(DEPS)
+	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_message_event.c -o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	@./__$@
 	@$(RM) __$@
 
