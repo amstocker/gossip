@@ -4,4 +4,4 @@
 #include "gossip.h"
 
 
-Status send_message (const char *msg, size_t len);
+Status send_message (const char *ip, short port, const char *msg, size_t len);
