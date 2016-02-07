@@ -5,8 +5,8 @@
 
 
 static Map *event_map = NULL;
-static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
-                           const struct sockaddr *addr, unsigned flags);
+static void event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
+                      const struct sockaddr *addr, unsigned flags);
 
 
 /* Event Handler Map
@@ -72,7 +72,7 @@ event_start (Server *server)
   Event *event = &server->event;
   int rc;
 
-  rc = uv_udp_recv_start ((uv_udp_t *) event, buffer_allocate, libuv_handler);
+  rc = uv_udp_recv_start ((uv_udp_t *) event, buffer_allocate, event_cb);
   if (rc < 0)
     goto error;
 
@@ -84,8 +84,8 @@ error:
 
 
 static void
-libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
-               const struct sockaddr *addr, unsigned flags)
+event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
+          const struct sockaddr *addr, unsigned flags)
 {
   Event *event = (Event *) req;
 
