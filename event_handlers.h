@@ -1,7 +1,7 @@
 #include "gossip.h"
 
 
-typedef Status (*EventHandler) (EventHandle *event);
+typedef Status (*EventHandler) (Event *event);
 
 // X_event_handler
-Status message_event_handler (EventHandle *event);
+Status message_event_handler (Event *event);

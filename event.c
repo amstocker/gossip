@@ -10,22 +10,22 @@ static void libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
 Status
 event_init (Server *server)
 {
-  EventHandle *handle = &server->event_handle;
+  Event *event = &server->event;
   int rc;
 
   rc = event_map_init ();
   if (rc < 0)
     goto error;
 
-  handle->json = json_builder_new ();
-  if (!handle->json)
+  event->json = json_builder_new ();
+  if (!event->json)
     goto error;
 
-  rc = uv_udp_init (server->loop, (uv_udp_t *) handle);
+  rc = uv_udp_init (server->loop, (uv_udp_t *) event);
   if (rc < 0)
     goto error;
 
-  rc = uv_udp_bind ((uv_udp_t *) handle, server->host, UV_UDP_REUSEADDR);
+  rc = uv_udp_bind ((uv_udp_t *) event, server->host, UV_UDP_REUSEADDR);
   if (rc < 0)
     goto error;
 
@@ -40,7 +40,7 @@ error:
 Status
 event_start (Server *server)
 {
-  EventHandle *handle  = &server->event_handle;
+  Event *handle  = &server->event;
   int rc;
 
   rc = uv_udp_recv_start ((uv_udp_t *) handle, buffer_allocate, libuv_handler);
@@ -58,8 +58,7 @@ static void
 libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                const struct sockaddr *addr, unsigned flags)
 {
-  EventHandle *event = (EventHandle *) req;
-  EventHandler handler;
+  Event *event = (Event *) req;
 
   printf ("libuv_handler: nread=%lu, buf=%.*s\n", nread, (int) buf->len, buf->base);
 
@@ -75,18 +74,15 @@ libuv_handler (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
 
   if (nread > 0) {
     
-    // if json is not parsable just abandon packet
     if (json_parse_src (event->json, buf->base, nread)
         != JSON_OK)
       goto done;
 
-    // get event type
     JsonVal *val = json_lookup (event->json, "event", 5);
     if (val->type != JSON_STRING)
       goto done;
 
-    // get proper handler and handle event
-    handler = event_get_handler (val->as_string, val->size);
+    EventHandler handler = event_get_handler (val->as_string, val->size);
     if (handler)
       // TODO: handle errors from handler?
       handler (event);

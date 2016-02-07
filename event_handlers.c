@@ -2,7 +2,7 @@
 
 
 Status
-message_event_handler (EventHandle *event)
+message_event_handler (Event *event)
 {
   printf ("handling MESSAGE event!\n");
 

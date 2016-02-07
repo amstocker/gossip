@@ -106,7 +106,7 @@ Status peer_set_addr (Peer *p, const struct sockaddr *addr);
 typedef struct {
   uv_udp_t req;
   JsonBuilder *json;
-} EventHandle;
+} Event;
 
 Status event_init (Server *server);
 Status event_start (Server *server);
@@ -162,7 +162,7 @@ struct Server {
   Map *peers;
   
   // handles
-  EventHandle event_handle;
+  Event event;
   ApiHandle api_handle;
 };
 
