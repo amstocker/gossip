@@ -5,4 +5,6 @@
 #include <sys/time.h>
 
 // timestamp in millis
-uint64_t time_now ();
+typedef double Time;
+
+Time time_now ();

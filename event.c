@@ -32,6 +32,7 @@ event_init (Server *server)
   event_map = string_map_new (EventKey, node, key);
   if (!event_map)
     return G_ERR;
+  
   size_t i = sizeof (event_keys) / sizeof (EventKey);
   while (i--)
     if (map_add (event_map, &event_keys[i], event_keys[i].key_size)
@@ -46,7 +47,16 @@ event_init (Server *server)
   if (rc < 0)
     goto error;
 
-  rc = uv_udp_bind ((uv_udp_t *) event, server->host, UV_UDP_REUSEADDR);
+  /* Init sockaddr used for UDP.  TODO: should parse either a multiaddr or
+   * "ip:port" string ("[ip]:port" for ipv6). */
+  struct sockaddr_storage host;
+  rc = uv_ip4_addr (server->host_ip, server->host_port,
+                    (struct sockaddr_in *) &host);
+  if (rc < 0)
+    goto error;
+
+  rc = uv_udp_bind ((uv_udp_t *) event, (const struct sockaddr *) &host,
+                    UV_UDP_REUSEADDR);
   if (rc < 0)
     goto error;
 
@@ -80,6 +90,8 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
           const struct sockaddr *addr, unsigned flags)
 {
   Event *event = (Event *) req;
+  Server *server = SERVER_FROM_EVENT (event);
+  // Time timestamp = time_now ();
 
   printf ("libuv_handler: nread=%lu, buf=%.*s\n", nread, (int) buf->len, buf->base);
 
@@ -89,7 +101,7 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
   if (nread < 0) {
     // TODO: log error
     uv_close ((uv_handle_t *) req, NULL);
-    return;
+    goto reject;
   }
 
   // TODO: log ...
@@ -98,16 +110,30 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
 
   if (json_parse_src (event->json, buf->base, nread)
       != JSON_OK)
-    goto done;
+    goto reject;
 
-  JsonVal *val = json_lookup (event->json, "event", 5);
+  Status stat = G_OK;
+  JsonVal *val;
+
+  // get ID and update Peer info or create new peer.
+  stat = peer_update (event);
+  if (stat)
+    goto reject;
+
+  // finally handle event
+  val = json_lookup (event->json, "event", 5);
   if (val->type != JSON_STRING)
-    goto done;
+    goto reject;
+  else {
+    EventKey *e = map_get (event_map, val->as_string, val->size);
+    if (e)
+      e->handler (event);
+  }
 
-  EventKey *e = map_get (event_map, val->as_string, val->size);
-  if (e)
-    e->handler (event);
+  return;
 
 done:
   free (buf->base);
+reject:
+  return;
 }

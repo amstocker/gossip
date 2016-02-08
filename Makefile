@@ -13,6 +13,7 @@ all: gossip
 
 LIBUV_VER = 1.8.0
 LEVELDB_VER = 1.18
+LIBUUID_VER = 1.0.3
 
 # paths
 DEPS_INCLUDE = deps/include
@@ -21,6 +22,7 @@ DEPS_SRC = deps/src
 
 LIBUV_PATH = $(DEPS_SRC)/libuv/libuv-$(LIBUV_VER)
 LEVELDB_PATH = $(DEPS_SRC)/leveldb/leveldb-$(LEVELDB_VER)
+LIBUUID_PATH = $(DEPS_SRC)/libuuid/libuuid-$(LIBUUID_VER)
 
 $(DEPS_INCLUDE):
 	mkdir -p $(DEPS_INCLUDE)
@@ -44,12 +46,22 @@ $(DEPS_BUILD)/libleveldb.a: $(DEPS_BUILD) $(DEPS_INCLUDE)
 	cp -r $(LEVELDB_PATH)/include/* $(DEPS_INCLUDE)
 	cp $(LEVELDB_PATH)/libleveldb.a $(DEPS_BUILD)
 
+# libuuid
+$(DEPS_BUILD)/libuuid.a: $(DEPS_BUILD) $(DEPS_INCLUDE)
+	cd $(DEPS_SRC)/libuuid; tar xzvf v$(LIBUUID_VER).tar.gz
+	cd $(LIBUUID_PATH); ./configure
+	$(MAKE) -C $(LIBUUID_PATH)
+	mkdir -p $(DEPS_INCLUDE)/uuid
+	cp $(LIBUUID_PATH)/*.h $(DEPS_INCLUDE)/uuid
+	cp $(LIBUUID_PATH)/.libs/libuuid.a $(DEPS_BUILD)
+
 
 ## Main ##
 
 DEPS = \
 	$(DEPS_BUILD)/libuv.a \
 	$(DEPS_BUILD)/libleveldb.a \
+	$(DEPS_BUILD)/libuuid.a
 
 SRC = $(filter-out gossip.c, $(wildcard *.c)) \
 	$(wildcard thirdparty/*.c) \
@@ -60,7 +72,7 @@ CFLAGS = -std=c99 \
 	-D_GNU_SOURCE \
 	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
 
-LDFLAGS = -luuid -lpthread
+LDFLAGS = -lpthread
 
 gossip: $(DEPS)
 	$(CC) $(CFLAGS) -I. $(SRC) gossip.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)

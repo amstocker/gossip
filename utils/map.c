@@ -119,7 +119,7 @@ map_get (Map *m, void *key, size_t key_size)
       return ELEM(m, bucket);
     bucket = bucket->next;
   }
-  return NULL;
+  return MAP_NULL;
 }
 
 
@@ -141,7 +141,7 @@ map_remove (Map *m, void *key, size_t key_size)
     prev = bucket;
     bucket = bucket->next;
   }
-  return NULL;
+  return MAP_NULL;
 }
 
 
@@ -150,7 +150,7 @@ map_items (Map *m)
 {
   void **elems = calloc(m->nelements, sizeof(void*));
   if (!elems)
-    return NULL;
+    return MAP_NULL;
   void **elem = elems;
   MapNode *n;
   for (size_t i = 0; i < m->nbuckets; i++) {
@@ -179,7 +179,7 @@ map_next (Map *m, void *elem)
     node = node->next;
   while
     (node && !node->key);
-  return node ? ELEM(m, node) : NULL;
+  return node ? ELEM(m, node) : MAP_NULL;
 }
 
 

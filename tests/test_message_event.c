@@ -1,7 +1,10 @@
 #include "test_send.h"
 
 
-const char *JSON = "{\"event\": \"message\", \"body\": \"hello server\"}";
+const char *JSON = "{\"id\": \"SERVER_ID\", \
+\"event\": \"message\", \
+\"body\":  \"hello server\" \
+}";
 
 int main ()
 {

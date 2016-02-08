@@ -38,6 +38,10 @@ typedef struct {
 } Map;
 
 
+#define MAP_EXISTS 1
+#define MAP_DOESNT_EXIST 0
+#define MAP_NULL NULL
+
 #define MAP_INIT_SIZE 4
 #define MAP_HIGH_WATERMARK 0.9
 
@@ -53,7 +57,7 @@ typedef struct {
 #define map_filled(M) ((float) M->nelements / M->nbuckets)
 
 #define MAP_FOREACH(T, V, M) for (T *V = map_head(M); \
-                                  V != NULL; \
+                                  V != MAP_NULL; \
                                   V = map_next(M, V))
 
 

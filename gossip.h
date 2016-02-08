@@ -2,8 +2,9 @@
 
 #include <stdlib.h>
 #include "deps/include/uv.h"
-#include <uuid/uuid.h>
+#include "deps/include/uuid/uuid.h"
 
+#include "utils/time.h"
 #include "utils/json.h"
 #include "utils/map.h"
 #include "utils/macros.h"
@@ -13,7 +14,23 @@
 #include <stdio.h>
 
 
+typedef enum {
+  G_OK  =  0,
+  G_ERR = -1,
+  G_WARN
+} Status;
+
 typedef struct Server Server;
+typedef struct Peer Peer;
+typedef struct Event Event;
+typedef struct Response Response;
+typedef struct Api Api;
+
+#define PEER_ID_SIZE 37
+#define PEER_MAX_NAME_LEN 63
+
+// id is an encoded uuid
+typedef char ID[PEER_ID_SIZE];
 
 
 
@@ -45,18 +62,6 @@ static const float default_ratelim_burst = 50.0;
 
 
 
-/* Global Error Codes
- * ------------------
- *
- */
-
-typedef enum {
-  G_OK  =  0,
-  G_ERR = -1
-} Status;
-
-
-
 /* Buffer (buffer.c)
  * -----------------
  *
@@ -73,23 +78,30 @@ void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
  *
  */
 
-#define PEER_MAX_NAME_LEN 63
+struct Peer {
+  
+  ID id;
+  
+  // ipv4 or ipv6
+  struct sockaddr addr;
 
-typedef struct {
-  uuid_t id;
+  // username
   char name[PEER_MAX_NAME_LEN + 1];
-  struct sockaddr addr;  // ipv4 or ipv6
 
-  uuid_t   msg_last_id;
+  // last message info
+  ID msg_last_id;
   uint64_t msg_last_time;  // timestamp in millis
   uint32_t msg_last_hash;
 
-  // rate limiting
+  // rate limiting metrics
   float msg_rate;
   float msg_rate_burst;
 
   MapNode node;
-} Peer;
+};
+
+Status peer_init (Server *server);
+Status peer_update (Event *event);
 
 
 
@@ -102,12 +114,12 @@ typedef struct {
  *
  */
 
-#define SERVER_FROM_EVENT(P) (container_of(P, Server, event))
+#define SERVER_FROM_EVENT(P) (container_of (P, Server, event))
 
-typedef struct {
+struct Event {
   uv_udp_t req;
   JsonBuilder *json;
-} Event;
+};
 
 Status event_init (Server *server);
 Status event_start (Server *server);
@@ -130,12 +142,12 @@ Status event_start (Server *server);
  *
  */
 
-#define SERVER_FROM_API(P) (container_of(P, Server, api))
+#define SERVER_FROM_API(P) (container_of (P, Server, api))
 
-typedef struct {
+struct Api {
   uv_pipe_t req;
   // ...
-} Api;
+};
 
 Status api_init (Server *server);
 
@@ -146,11 +158,12 @@ Status api_init (Server *server);
  *
  */
 
-typedef struct {
+struct Response {
   uv_udp_t req;
+  // uv_timer_t timer; ???
   uv_buf_t buf;
   int retry;
-} Response;
+};
 
 
 
@@ -160,16 +173,19 @@ typedef struct {
  */
 
 struct Server {
+  
   uv_loop_t *loop;
 
   // config
-  uuid_t host_id;
-  struct sockaddr *host;
-  char *username;
+  ID     host_id;
+  char  *host_ip;
+  short  host_port;
+  char  *host_username;
+  
   int retries;
   int retry_wait;
   int ratelim_window;
-  int ratelim_window_burst;
+  int ratelim_burst_window;
   float ratelim;
   float ratelim_burst;
 

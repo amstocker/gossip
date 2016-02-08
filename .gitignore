@@ -4,9 +4,9 @@ gossip
 # dependency builds #
 deps/include
 deps/build
-deps/src/jsmn/jsmn.o
 deps/src/libuv/libuv-*
 deps/src/leveldb/leveldb-*
+deps/src/libuuid/libuuid-*
 
 # backup files #
 *~

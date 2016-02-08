@@ -52,6 +52,8 @@ struct JsonVal {
 struct JsonBuilder {
   JsonVal *vals;
   Map *keymap;
+  size_t start;
+  size_t size;
   
   // for use by the jsmn parsing library
   jsmn_parser parser;

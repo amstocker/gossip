@@ -47,6 +47,8 @@ json_builder_new ()
   if (!b->vals)
     goto error;
 
+  b->start = 0;
+  b->size = 0;
   return b;
 
 error:
@@ -62,6 +64,8 @@ json_builder_clear (JsonBuilder *b)
   jsmn_init (&b->parser);
   memset (b->tokens, 0, b->toklen * sizeof (jsmntok_t));
   memset (b->vals, 0, (b->toklen / 2) * sizeof (JsonVal));
+  b->start = 0;
+  b->size = 0;
   return JSON_OK;
 }
 
@@ -90,6 +94,10 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
   rc = jsmn_parse(&b->parser, src, srclen, b->tokens, b->toklen);
 
   if (rc < 0) goto error;
+  if (!b->tokens[0].type) goto error;
+
+  b->start = b->tokens[0].start;
+  b->size = b->tokens[0].end - b->start;
 
   // add all tokens to key map.
   // start at index 1 because the 0th element
