@@ -78,9 +78,15 @@ void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
  *
  */
 
+typedef enum {
+  PEER_UNTRUSTED,
+  PEER_TRUSTED
+} PeerType;
+
 struct Peer {
   
   ID id;
+  PeerType type;
   
   // ipv4 or ipv6
   struct sockaddr addr;

@@ -86,7 +86,7 @@ test-json: $(DEPS)
 	./__$@
 	$(RM) __$@
 
-test-message-event: $(DEPS) gossip
+test-message-event: clean gossip
 	@echo "starting test daemon ..."
 	@sh tests/test_daemon_start.sh
 	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
@@ -104,6 +104,7 @@ test-message-event: $(DEPS) gossip
 clean:
 	$(RM) gossip
 	$(RM) __test*
+	if pgrep gossip; then killall gossip; fi
 
 deep-clean: clean
 	$(RM) -r $(DEPS_INCLUDE)

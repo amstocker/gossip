@@ -23,15 +23,22 @@ peer_update (Event *event)
   if (val->type != JSON_STRING)
     goto error;
 
+  /* If the id doesn't exist in our map, just reject this message
+   * outright.  New peers can be created with a discover/join event. */
   Peer *peer = map_get (server->peers, val->as_string, val->size);
   if (!peer)
     goto error;
 
+  Time timestamp;
   val = json_lookup (event->json, "timestamp", 9);
   if (val->type != JSON_DOUBLE)
-    goto error;
+    timestamp = time_now ();
+  else
+    timestamp = (Time) val->as_double;
 
   // update last message info and rates ...
+  
+  printf ("updated peer @ %lf\n", timestamp);
 
   return G_OK;
 

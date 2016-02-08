@@ -1,7 +1,10 @@
+#include <string.h>
+
 #include "gossip.h"
 #include "event_handlers.h"
 #include "utils/map.h"
 #include "utils/json.h"
+#include "utils/comparator.h"
 
 
 static Map *event_map = NULL;
@@ -115,25 +118,24 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
   Status stat = G_OK;
   JsonVal *val;
 
-  // get ID and update Peer info or create new peer.
-  stat = peer_update (event);
-  if (stat)
-    goto reject;
-
-  // finally handle event
   val = json_lookup (event->json, "event", 5);
   if (val->type != JSON_STRING)
+    // reject for invalid event type
     goto reject;
-  else {
-    EventKey *e = map_get (event_map, val->as_string, val->size);
-    if (e)
-      e->handler (event);
-  }
+
+  EventKey *e = map_get (event_map, val->as_string, val->size);
+  if (e)
+    e->handler (event);
 
   return;
 
 done:
+  // send Ack Response
   free (buf->base);
+  return;
+
 reject:
+  // send Reject Response
+  free (buf->base);
   return;
 }
