@@ -1,10 +1,7 @@
-#include <string.h>
-
 #include "gossip.h"
 #include "event_handlers.h"
 #include "utils/map.h"
 #include "utils/json.h"
-#include "utils/comparator.h"
 
 
 static Map *event_map = NULL;
@@ -127,15 +124,15 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
   if (e)
     e->handler (event);
 
-  return;
-
 done:
   // send Ack Response
-  free (buf->base);
-  return;
+  goto finally;
 
 reject:
   // send Reject Response
+  goto finally;
+
+finally:
   free (buf->base);
   return;
 }
