@@ -27,6 +27,7 @@ typedef struct Server Server;
  *  - logfile?
  *
  */
+
 static const char *default_host_ip = "127.0.0.1";
 static const short default_host_port = 9670;
 
@@ -75,20 +76,18 @@ void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
 typedef struct {
   uuid_t id;
   char name[PEER_MAX_NAME_LEN + 1];
-  struct sockaddr *addr;  // ipv4 or ipv6
+  struct sockaddr addr;  // ipv4 or ipv6
 
-  uuid_t msg_last_id;
-  uint64_t msg_last_time;     // timestamp in millis
+  uuid_t   msg_last_id;
+  uint64_t msg_last_time;  // timestamp in millis
   uint32_t msg_last_hash;
 
   // rate limiting
   float msg_rate;
   float msg_rate_burst;
-} Peer;
 
-Peer *peer_new ();
-Status peer_set_name (Peer *p, const char *buf, size_t len);
-Status peer_set_addr (Peer *p, const struct sockaddr *addr);
+  MapNode node;
+} Peer;
 
 
 
@@ -146,10 +145,10 @@ Status api_init (Server *server);
  */
 
 struct Server {
-
   uv_loop_t *loop;
 
   // config
+  uuid_t host_id;
   struct sockaddr *host;
   char *username;
   int retries;
@@ -159,6 +158,7 @@ struct Server {
   float ratelim;
   float ratelim_burst;
 
+  // hash table by id;
   Map *peers;
   
   // handles

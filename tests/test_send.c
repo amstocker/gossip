@@ -1,8 +1,8 @@
 #include "test_send.h"
 
 
-static
-uv_buf_t make_buf (const char *msg, size_t len)
+static uv_buf_t
+make_buf (const char *msg, size_t len)
 {
   uv_buf_t buf;
   buffer_allocate (NULL, 4096, &buf);

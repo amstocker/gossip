@@ -52,13 +52,14 @@ DEPS = \
 	$(DEPS_BUILD)/libleveldb.a \
 
 SRC = $(filter-out gossip.c, $(wildcard *.c)) \
-			$(wildcard thirdparty/*.c) \
-			$(wildcard utils/*.c)
+	$(wildcard thirdparty/*.c) \
+	$(wildcard utils/*.c)
 
 CFLAGS = -std=c99 \
-				 -Wall -Wno-unused-variable \
-				 -D_GNU_SOURCE \
-				 -DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
+	-Wall -Wno-unused-variable \
+	-D_GNU_SOURCE \
+	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
+
 LDFLAGS = -luuid -lpthread
 
 gossip: $(DEPS)

@@ -13,3 +13,10 @@ message_event_handler (Event *event)
   printf ("handling MESSAGE: \"%.*s\"\n", (int) val->size, val->as_string);
   return G_OK;
 }
+
+
+Status
+handshake_event_handler (Event *event)
+{
+  return G_OK;
+}
