@@ -16,6 +16,7 @@
 typedef struct Server Server;
 
 
+
 /* Configuration
  * -------------
  *
@@ -35,12 +36,13 @@ static const char *default_unix = "/tmp/gossip.sock";
 static const int default_backlog = 128;
 
 static const int default_retries = 3;
-static const int default_retry_wait = 10000 /* ms */;
+static const int default_retry_wait = 3000 /* ms */;
 
 static const int default_ratelim_window = 30000 /* ms */;
 static const int default_ratelim_burst_window = 1000 /* ms */;
 static const float default_ratelim = 500.0;
 static const float default_ratelim_burst = 50.0;
+
 
 
 /* Global Error Codes
@@ -136,6 +138,19 @@ typedef struct {
 } Api;
 
 Status api_init (Server *server);
+
+
+
+/* Response (response.c)
+ * ---------------------
+ *
+ */
+
+typedef struct {
+  uv_udp_t req;
+  uv_buf_t buf;
+  int retry;
+} Response;
 
 
 
