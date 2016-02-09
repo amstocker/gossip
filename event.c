@@ -29,6 +29,8 @@ event_init (Server *server)
 {
   Event *event = &server->event;
   int rc;
+
+  event->reusable_base = NULL;
   
   event_map = string_map_new (EventKey, node, key);
   if (!event_map)
@@ -74,8 +76,6 @@ event_start (Server *server)
 {
   Event *event = &server->event;
   int rc;
-
-  event->reusable_base = NULL;
 
   rc = uv_udp_recv_start ((uv_udp_t *) event, event_alloc_cb, event_cb);
   if (rc < 0)

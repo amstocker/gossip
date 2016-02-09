@@ -13,6 +13,8 @@ api_init (Server *server)
   Api *api = &server->api;
   int rc;
 
+  api->reusable_base = NULL;
+
   uv_fs_t req;
   uv_fs_unlink (server->loop, &req, server->host_pipe, NULL);
   // ignore error if pipe doesn't already exist
