@@ -80,8 +80,14 @@ gossip: $(DEPS)
 
 ## Tests ##
 
-test-json: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json.c \
+test-json-parse: $(DEPS)
+	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json_parse.c \
+		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
+	./__$@
+	$(RM) __$@
+
+test-json-build: $(DEPS)
+	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json_build.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	./__$@
 	$(RM) __$@
