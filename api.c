@@ -52,7 +52,7 @@ error:
 
 
 Status
-api_send (Server *server, uv_buf_t *buf)
+api_send (Server *server, uv_buf_t *buf, uv_write_cb callback)
 {
   uv_pipe_t *client = (uv_pipe_t *) &server->api.client;
   
@@ -60,7 +60,7 @@ api_send (Server *server, uv_buf_t *buf)
     goto error;
 
   uv_write_t req;
-  int rc = uv_write (&req, (uv_stream_t *) client, buf, 1, api_write_cb);
+  int rc = uv_write (&req, (uv_stream_t *) client, buf, 1, callback);
   if (rc < 0)
     goto error;
 
@@ -139,7 +139,7 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 
   uv_buf_t echo = { .base = buf->base, .len = nread };
 
-  api_send (SERVER_FROM_API(API_FROM_CLIENT(client)), &echo);
+  api_send (SERVER_FROM_API(API_FROM_CLIENT(client)), &echo, api_write_cb);
 
 
 done:
