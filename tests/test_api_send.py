@@ -11,7 +11,8 @@ server = socket.socket (socket.AF_UNIX, socket.SOCK_STREAM)
 
 try:
     server.connect (PATH)
-    server.send ("hello, server!")
+    for i in xrange(10):
+        server.send ("{} ".format(i))
 except:
     print "socket connection refused"
     sys.exit(0)
