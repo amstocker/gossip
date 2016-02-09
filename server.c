@@ -11,6 +11,8 @@ server_init (Server *server)
   
   server->host_ip = (char *) default_host_ip;
   server->host_port = default_host_port;
+  server->host_pipe = (char *) default_host_pipe;
+  server->host_backlog = default_host_backlog;
   server->retries = default_retries;
   server->retry_wait = default_retry_wait;
   server->ratelim = default_ratelim;
@@ -29,10 +31,13 @@ server_init (Server *server)
   if (stat)
     goto error;
 
+  stat = api_init (server);
+  if (stat)
+    goto error;
+
   return G_OK;
 
 error:
-  printf ("server init ERR!\n");
   return stat;
 }
 
@@ -47,6 +52,10 @@ server_run (Server *server)
   if (stat)
     goto error;
 
+  stat = api_start (server);
+  if (stat)
+    goto error;
+
   rc = uv_run (server->loop, UV_RUN_DEFAULT);
   if (rc < 0)
     goto error;
@@ -54,6 +63,5 @@ server_run (Server *server)
   return G_OK;
 
 error:
-  printf ("server run ERR!\n");
   return G_ERR;
 }

@@ -98,6 +98,15 @@ test-message-event: clean gossip
 	@echo "stopping test daemon ..."
 	@sh tests/test_daemon_stop.sh
 
+test-api-send: clean gossip
+	@echo "starting test daemon ..."
+	@sh tests/test_daemon_start.sh
+	@echo "================================test output:"
+	@./tests/test_api_send.py
+	@echo "==========================================="
+	@echo "stopping test daemon ..."
+	@sh tests/test_daemon_stop.sh
+
 
 ## Clean ##
 
@@ -105,6 +114,7 @@ clean:
 	$(RM) gossip
 	$(RM) __test*
 	if pgrep gossip; then killall gossip; fi
+	$(RM) /tmp/gossip.sock
 
 deep-clean: clean
 	$(RM) -r $(DEPS_INCLUDE)

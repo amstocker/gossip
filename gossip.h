@@ -26,6 +26,7 @@ typedef struct Event Event;
 typedef struct Response Response;
 typedef struct Api Api;
 
+
 #define PEER_ID_SIZE 37
 #define PEER_MAX_NAME_LEN 63
 
@@ -49,8 +50,8 @@ typedef char ID[PEER_ID_SIZE];
 static const char *default_host_ip = "127.0.0.1";
 static const short default_host_port = 9670;
 
-static const char *default_unix = "/tmp/gossip.sock";
-static const int default_backlog = 128;
+static const char *default_host_pipe = "/tmp/gossip.sock";
+static const int default_host_backlog = 128;
 
 static const int default_retries = 3;
 static const int default_retry_wait = 3000 /* ms */;
@@ -135,16 +136,17 @@ Status event_start (Server *server);
 /* Api (api.c)
  * -----------
  *
- * Send commands varint-length-prefixed like so:
+ * Handle rpc commands coming through local socket.
  *
- *  | varint | 1 b |    N bytes    |
- *  |<prefix>|<cmd>|<message-bytes>|
+ * Format:
+ *    
+ *    {"cmd" : <cmd>,
+ *     "data": <data>  // optional
+ *     }
  *
  * Commands:
- *    
- *  M <body>  := new message
- *  G <n>     := get new messages
- *  Q         := quit
+ *
+ *    "message":  Makes a new message
  *
  */
 
@@ -152,10 +154,11 @@ Status event_start (Server *server);
 
 struct Api {
   uv_pipe_t req;
-  // ...
 };
 
 Status api_init (Server *server);
+Status api_start (Server *server);
+Status api_send (uv_buf_t buf);
 
 
 
@@ -187,6 +190,9 @@ struct Server {
   char  *host_ip;
   short  host_port;
   char  *host_username;
+
+  char *host_pipe;
+  int   host_backlog;
   
   int retries;
   int retry_wait;
