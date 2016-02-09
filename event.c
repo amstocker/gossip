@@ -1,7 +1,5 @@
 #include "gossip.h"
 #include "event_handlers.h"
-#include "utils/map.h"
-#include "utils/json.h"
 
 
 static Map *event_map = NULL;
@@ -45,7 +43,7 @@ event_init (Server *server)
       goto error;
   
   debug ("json parser init");
-  event->json = json_builder_new ();
+  event->json = json_parser_new ();
   if (!event->json)
     goto error;
 

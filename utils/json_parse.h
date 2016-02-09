@@ -27,7 +27,7 @@ typedef enum {
   JSON_NULL
 } JsonValType;
 
-typedef struct JsonBuilder JsonBuilder;
+typedef struct JsonParser JsonParser;
 typedef struct JsonVal JsonVal;
 
 struct JsonVal {
@@ -49,7 +49,7 @@ struct JsonVal {
  * query for keys.  Each builder can only focus on one json source string at
  * a time.
  **/
-struct JsonBuilder {
+struct JsonParser {
   JsonVal *vals;
   Map *keymap;
   size_t start;
@@ -62,8 +62,8 @@ struct JsonBuilder {
 };
 
 
-JsonBuilder *json_builder_new ();
-JsonStatus json_builder_clear (JsonBuilder *b);
-JsonStatus json_builder_destroy (JsonBuilder *b);
-JsonStatus json_parse_src (JsonBuilder *b, char *src, size_t srclen);
-JsonVal *json_lookup (JsonBuilder *b, char *key, size_t key_size);
+JsonParser *json_parser_new ();
+JsonStatus json_parser_clear (JsonParser *b);
+JsonStatus json_parser_destroy (JsonParser *b);
+JsonStatus json_parse_src (JsonParser *b, char *src, size_t srclen);
+JsonVal *json_lookup (JsonParser *b, char *key, size_t key_size);

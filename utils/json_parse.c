@@ -1,4 +1,4 @@
-#include "utils/json.h"
+#include "utils/json_parse.h"
 
 
 #define TOKSIZE(tok) ((size_t) (tok->end - tok->start))
@@ -23,96 +23,96 @@ hash_token (void *key, size_t key_size)
 }
 
 
-JsonBuilder*
-json_builder_new ()
+JsonParser*
+json_parser_new ()
 {
-  JsonBuilder *b = malloc (sizeof(JsonBuilder));
-  if (!b)
+  JsonParser *j = malloc (sizeof(JsonParser));
+  if (!j)
     goto error;
 
-  b->keymap = map_new (JsonVal, node, key);
+  j->keymap = map_new (JsonVal, node, key);
   
-  if (!b->keymap)
+  if (!j->keymap)
     goto error;
-  b->keymap->hash = hash_token;
-  b->keymap->cmp = comparator_token;
+  j->keymap->hash = hash_token;
+  j->keymap->cmp = comparator_token;
 
-  jsmn_init (&b->parser);
-  b->toklen = JSON_MAX_TOKENS;
-  b->tokens = calloc (b->toklen, sizeof (jsmntok_t));
-  if (!b->tokens)
-    goto error;
-
-  b->vals = calloc (b->toklen / 2, sizeof (JsonVal));
-  if (!b->vals)
+  jsmn_init (&j->parser);
+  j->toklen = JSON_MAX_TOKENS;
+  j->tokens = calloc (j->toklen, sizeof (jsmntok_t));
+  if (!j->tokens)
     goto error;
 
-  b->start = 0;
-  b->size = 0;
-  return b;
+  j->vals = calloc (j->toklen / 2, sizeof (JsonVal));
+  if (!j->vals)
+    goto error;
+
+  j->start = 0;
+  j->size = 0;
+  return j;
 
 error:
-  json_builder_destroy (b);
+  json_parser_destroy (j);
   return NULL;
 }
 
 
 JsonStatus
-json_builder_clear (JsonBuilder *b)
+json_parser_clear (JsonParser *j)
 {
-  map_clear (b->keymap);
-  jsmn_init (&b->parser);
-  memset (b->tokens, 0, b->toklen * sizeof (jsmntok_t));
-  memset (b->vals, 0, (b->toklen / 2) * sizeof (JsonVal));
-  b->start = 0;
-  b->size = 0;
+  map_clear (j->keymap);
+  jsmn_init (&j->parser);
+  memset (j->tokens, 0, j->toklen * sizeof (jsmntok_t));
+  memset (j->vals, 0, (j->toklen / 2) * sizeof (JsonVal));
+  j->start = 0;
+  j->size = 0;
   return JSON_OK;
 }
 
 
 JsonStatus
-json_builder_destroy (JsonBuilder *b)
+json_parser_destroy (JsonParser *j)
 {
-  if (!b)
+  if (!j)
     return JSON_ERR;
-  if (map_free (b->keymap) != MAP_OK)
+  if (map_free (j->keymap) != MAP_OK)
     return JSON_ERR;
-  free (b->tokens);
-  free (b->vals);
-  free (b);
+  free (j->tokens);
+  free (j->vals);
+  free (j);
   return JSON_OK;
 }
 
 
 JsonStatus
-json_parse_src (JsonBuilder *b, char *src, size_t srclen)
+json_parse_src (JsonParser *j, char *src, size_t srclen)
 {
-  if (json_builder_clear(b) != JSON_OK)
+  if (json_parser_clear(j) != JSON_OK)
     return JSON_ERR;
 
   int rc;
-  rc = jsmn_parse(&b->parser, src, srclen, b->tokens, b->toklen);
+  rc = jsmn_parse(&j->parser, src, srclen, j->tokens, j->toklen);
 
   if (rc < 0) goto error;
-  if (!b->tokens[0].type) goto error;
+  if (!j->tokens[0].type) goto error;
 
-  b->start = b->tokens[0].start;
-  b->size = b->tokens[0].end - b->start;
+  j->start = j->tokens[0].start;
+  j->size = j->tokens[0].end - j->start;
 
   // add all tokens to key map.
   // start at index 1 because the 0th element
   // is just the root json object.
   jsmntok_t *keytok, *valtok;
-  JsonVal *p = b->vals, *val;
-  for (size_t i = 1; i < b->toklen; i += 2) {
-    keytok = &b->tokens[i];
+  JsonVal *p = j->vals, *val;
+  for (size_t i = 1; i < j->toklen; i += 2) {
+    keytok = &j->tokens[i];
     if (!keytok->type)
       // done adding.
       break;
-    if (!(i + 1 < b->toklen))
+    if (!(i + 1 < j->toklen))
       // should end up with an even number of KV pairs
       goto error;
-    valtok = &b->tokens[i+1];
+    valtok = &j->tokens[i+1];
     
     // only accept key-value pairs with string keys and
     // string, primitive, or array values.
@@ -127,7 +127,7 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
     val->size = TOKSIZE(valtok);
 
     // check for duplicate keys
-    if (map_get (b->keymap, &val->key, TOKSIZE(keytok)))
+    if (map_get (j->keymap, &val->key, TOKSIZE(keytok)))
       goto error;
 
     // parse type of value.
@@ -168,23 +168,23 @@ json_parse_src (JsonBuilder *b, char *src, size_t srclen)
         goto error;
     }
 
-    if (map_add (b->keymap, val, TOKSIZE(keytok)) != MAP_OK)
+    if (map_add (j->keymap, val, TOKSIZE(keytok)) != MAP_OK)
       goto error;
   }
 
   return JSON_OK;
 
 error:
-  json_builder_clear (b);
+  json_parser_clear (j);
   return JSON_ERR;
 }
 
 
 JsonVal*
-json_lookup (JsonBuilder *b, char *key, size_t key_size)
+json_lookup (JsonParser *j, char *key, size_t key_size)
 {
   JsonVal *val;
-  return (val = map_get(b->keymap, &key, key_size))
+  return (val = map_get(j->keymap, &key, key_size))
          ? val
          : (JsonVal *) &JSONVAL_UNDEFINED;
 }

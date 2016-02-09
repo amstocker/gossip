@@ -6,7 +6,7 @@
 #include "deps/include/uuid/uuid.h"
 
 #include "utils/time.h"
-#include "utils/json.h"
+#include "utils/json_parse.h"
 #include "utils/map.h"
 #include "utils/macros.h"
 
@@ -118,7 +118,7 @@ Status peer_update (Event *event);
 
 struct Event {
   uv_udp_t req;
-  JsonBuilder *json;
+  JsonParser *json;
   char *reusable_base;
   bool base_alloc;
 };
