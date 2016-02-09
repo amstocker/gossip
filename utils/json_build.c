@@ -10,7 +10,7 @@
  * for non-scientific notation (%lf):
  *  #define DBL_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
  *
- * for scientfici notation (%e):
+ * for scientific notation (%e):
  *  #define DBL_SIZE 24
  */
 #define DBL_SIZE (3 + DBL_MANT_DIG - DBL_MIN_EXP)
