@@ -51,6 +51,26 @@ error:
 }
 
 
+Status
+api_send (Server *server, uv_buf_t *buf)
+{
+  uv_pipe_t *client = (uv_pipe_t *) &server->api.client;
+  
+  if (!uv_is_active ((uv_handle_t *) client))
+    goto error;
+
+  uv_write_t req;
+  int rc = uv_write (&req, (uv_stream_t *) client, buf, 1, api_write_cb);
+  if (rc < 0)
+    goto error;
+
+  return G_OK;
+
+error:
+  return G_ERR;
+}
+
+
 static void
 api_newconn (uv_stream_t *req, int status)
 {
@@ -119,8 +139,7 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 
   uv_buf_t echo = { .base = buf->base, .len = nread };
 
-  uv_write_t req;
-  uv_write (&req, client, &echo, 1, api_write_cb);
+  api_send (SERVER_FROM_API(API_FROM_CLIENT(client)), &echo);
 
 
 done:

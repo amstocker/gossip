@@ -151,7 +151,7 @@ struct Api {
 
 Status api_init (Server *server);
 Status api_start (Server *server);
-Status api_send (uv_buf_t buf);
+Status api_send (Server *server, uv_buf_t *buf);
 
 
 
