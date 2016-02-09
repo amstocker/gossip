@@ -19,6 +19,7 @@ static EventKey event_keys[] = {
 };
 
 
+static void event_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf);
 static void event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
                       const struct sockaddr *addr, unsigned flags);
 
@@ -74,7 +75,9 @@ event_start (Server *server)
   Event *event = &server->event;
   int rc;
 
-  rc = uv_udp_recv_start ((uv_udp_t *) event, buffer_allocate, event_cb);
+  event->reusable_base = NULL;
+
+  rc = uv_udp_recv_start ((uv_udp_t *) event, event_alloc_cb, event_cb);
   if (rc < 0)
     goto error;
 
@@ -82,6 +85,19 @@ event_start (Server *server)
 
 error:
   return G_ERR;
+}
+
+
+static void
+event_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf)
+{
+  Event *event = (Event *) req;
+  if (!event->reusable_base)
+    event->reusable_base = malloc (suggested);
+  
+  // memset (event->reusable_base, 0, suggested);
+  buf->base = event->reusable_base;
+  buf->len = suggested;
 }
 
 
@@ -133,6 +149,5 @@ reject:
   goto finally;
 
 finally:
-  free (buf->base);
   return;
 }

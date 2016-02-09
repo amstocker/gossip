@@ -1,7 +1,9 @@
 #include "gossip.h"
 
 
-static void api_newconn (uv_stream_t *api, int status);
+static void api_newconn (uv_stream_t *req, int status);
+static void api_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf);
+static void api_write_cb (uv_write_t *req, int status);
 static void api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
 
 
@@ -48,26 +50,22 @@ error:
 
 
 static void
-api_newconn (uv_stream_t *api, int status)
+api_newconn (uv_stream_t *req, int status)
 {
+  Api *api = (Api *) req;
   Server *server = SERVER_FROM_API (api);
   int rc;
 
-  if (status) goto error;
-
-  uv_pipe_t *client = malloc (sizeof (uv_pipe_t));
-  if (!client)
-    goto error;
-
-  rc = uv_pipe_init (server->loop, client, 0);
+  rc = uv_pipe_init (server->loop, &api->client, 0);
   if (rc < 0)
     goto error;
 
-  rc = uv_accept (api, (uv_stream_t *) client);
+  uv_stream_t *client = (uv_stream_t *) &api->client;
+  rc = uv_accept ((uv_stream_t *) api, client);
   if (rc < 0)
     goto error;
 
-  rc = uv_read_start ((uv_stream_t *) client, buffer_allocate, api_cb);
+  rc = uv_read_start (client, api_alloc_cb, api_cb);
   if (rc < 0)
     goto error;
 
@@ -76,9 +74,21 @@ api_newconn (uv_stream_t *api, int status)
 error:
   if (client) {
     uv_close ((uv_handle_t *) client, NULL);
-    free (client);
   }
   return;
+}
+
+
+static void
+api_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf)
+{
+  Api *api = API_FROM_CLIENT (req);
+  if (!api->reusable_base)
+    api->reusable_base = malloc (suggested);
+
+  // memset (api->reusable_base, 0, suggested);
+  buf->base = api->reusable_base;
+  buf->len = suggested;
 }
 
 
@@ -89,6 +99,8 @@ api_write_cb (uv_write_t *req, int status)
     printf ("api write ERR!\n");
   else
     printf ("api write OK.\n");
+  
+  free (req);
 }
 
 
@@ -120,5 +132,5 @@ reject:
   goto finally;
 
 finally:
-  free (buf->base);
+  return;
 }

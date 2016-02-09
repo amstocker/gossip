@@ -63,17 +63,6 @@ static const float default_ratelim_burst = 50.0;
 
 
 
-/* Buffer (buffer.c)
- * -----------------
- *
- * Handle buffer allocations.
- *
- */
-
-void buffer_allocate (uv_handle_t *handle, size_t suggested, uv_buf_t *buf);
-
-
-
 /* Peer (peer.c)
  * -------------
  *
@@ -126,6 +115,7 @@ Status peer_update (Event *event);
 struct Event {
   uv_udp_t req;
   JsonBuilder *json;
+  char *reusable_base;
 };
 
 Status event_init (Server *server);
@@ -151,9 +141,12 @@ Status event_start (Server *server);
  */
 
 #define SERVER_FROM_API(P) (container_of (P, Server, api))
+#define API_FROM_CLIENT(P) (container_of (P, Api, client))
 
 struct Api {
   uv_pipe_t req;
+  uv_pipe_t client;
+  char *reusable_base;
 };
 
 Status api_init (Server *server);

@@ -114,7 +114,6 @@ clean:
 	$(RM) gossip
 	$(RM) __test*
 	if pgrep gossip; then killall gossip; fi
-	$(RM) /tmp/gossip.sock
 
 deep-clean: clean
 	$(RM) -r $(DEPS_INCLUDE)

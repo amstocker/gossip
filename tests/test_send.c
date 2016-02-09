@@ -5,7 +5,8 @@ static uv_buf_t
 make_buf (const char *msg, size_t len)
 {
   uv_buf_t buf;
-  buffer_allocate (NULL, 4096, &buf);
+  buf.base = malloc (4096);
+  buf.len = 4096;
   memset (buf.base, 0, 4096);
   memcpy (buf.base, msg, len);
   return buf;
