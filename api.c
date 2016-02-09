@@ -161,10 +161,12 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 
 
 done:
+  debug ("done");
   // done
   goto finally;
 
 reject:
+  debug ("reject");
   // reject
   goto finally;
 

@@ -63,7 +63,7 @@ struct JsonParser {
 
 
 JsonParser *json_parser_new ();
-JsonStatus json_parser_clear (JsonParser *b);
-JsonStatus json_parser_destroy (JsonParser *b);
-JsonStatus json_parse_src (JsonParser *b, char *src, size_t srclen);
-JsonVal *json_lookup (JsonParser *b, char *key, size_t key_size);
+JsonStatus json_parser_clear (JsonParser *j);
+JsonStatus json_parser_destroy (JsonParser *j);
+JsonStatus json_parse_src (JsonParser *j, char *src, size_t srclen);
+JsonVal *json_lookup (JsonParser *j, char *key, size_t key_size);

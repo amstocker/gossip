@@ -151,10 +151,11 @@ event_cb (uv_udp_t *req, ssize_t nread, const uv_buf_t *buf,
     // reject for invalid event type
     goto reject;
 
-  debug ("handling event: %.*s", (int) val->size, val->as_string);
   EventKey *e = map_get (event_map, val->as_string, val->size);
-  if (e)
+  if (e) {
+    debug ("handling event: %.*s", (int) val->size, val->as_string);
     e->handler (event);
+  }
 
 done:
   debug ("done");
