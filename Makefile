@@ -94,20 +94,20 @@ test-json-build: $(DEPS)
 
 test-message-event: clean gossip
 	@echo "[MAKE] starting test daemon ..."
-	@sh tests/test_daemon_start.sh
-	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
+	@-sh tests/test_daemon_start.sh
+	@-$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
-	@./__$@
-	@$(RM) __$@
+	@-./__$@
+	@-$(RM) __$@
 	@echo "[MAKE] stopping test daemon ..."
-	@sh tests/test_daemon_stop.sh
+	@-sh tests/test_daemon_stop.sh
 
 test-api-send: clean gossip
 	@echo "[MAKE] starting test daemon ..."
-	@sh tests/test_daemon_start.sh
-	@./tests/test_api_send.py
+	@-sh tests/test_daemon_start.sh
+	@-./tests/test_api_send.py
 	@echo "[MAKE] stopping test daemon ..."
-	@sh tests/test_daemon_stop.sh
+	@-sh tests/test_daemon_stop.sh
 
 
 ## Clean ##
@@ -115,7 +115,6 @@ test-api-send: clean gossip
 clean:
 	$(RM) gossip
 	$(RM) __test*
-	if pgrep gossip; then killall gossip; fi
 
 deep-clean: clean
 	$(RM) -r $(DEPS_INCLUDE)
