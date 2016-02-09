@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import socket
 
 
@@ -13,5 +14,11 @@ try:
     server.send ("hello, server!")
 except:
     print "socket connection refused"
-finally:
-    server.close()
+    sys.exit(0)
+
+try:
+    data = server.recv(4096)
+    print "got response from server:", data
+except:
+    print "socket recv failed"
+    sys.exit(0)

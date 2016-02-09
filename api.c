@@ -82,6 +82,16 @@ error:
 }
 
 
+void
+api_write_cb (uv_write_t *req, int status)
+{
+  if (status)
+    printf ("api write ERR!\n");
+  else
+    printf ("api write OK.\n");
+}
+
+
 static void
 api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 {
@@ -94,6 +104,11 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
   }
 
   printf ("got message from api: \"%.*s\"\n", (int) nread, buf->base);
+
+  uv_write_t *req = malloc (sizeof (uv_write_t));
+  uv_buf_t wbuf = uv_buf_init (buf->base, nread);
+  
+  uv_write (req, client, &wbuf, 1, api_write_cb);
 
 
 done:
