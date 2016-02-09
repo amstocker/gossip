@@ -87,24 +87,20 @@ test-json: $(DEPS)
 	$(RM) __$@
 
 test-message-event: clean gossip
-	@echo "starting test daemon ..."
+	@echo "[MAKE] starting test daemon ..."
 	@sh tests/test_daemon_start.sh
 	@$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
-	@echo "================================test output:"
 	@./__$@
-	@echo "==========================================="
 	@$(RM) __$@
-	@echo "stopping test daemon ..."
+	@echo "[MAKE] stopping test daemon ..."
 	@sh tests/test_daemon_stop.sh
 
 test-api-send: clean gossip
-	@echo "starting test daemon ..."
+	@echo "[MAKE] starting test daemon ..."
 	@sh tests/test_daemon_start.sh
-	@echo "================================test output:"
 	@./tests/test_api_send.py
-	@echo "==========================================="
-	@echo "stopping test daemon ..."
+	@echo "[MAKE] stopping test daemon ..."
 	@sh tests/test_daemon_stop.sh
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include "deps/include/uv.h"
 #include "deps/include/uuid/uuid.h"
 
@@ -12,6 +13,9 @@
 
 // DEBUG
 #include <stdio.h>
+#define debug(M, ...) fprintf (stderr, "[DEBUG %s:%s:%d] " M "\n", \
+                                __FILE__, __FUNCTION__, __LINE__, \
+                                ##__VA_ARGS__)
 
 
 typedef enum {
@@ -116,6 +120,7 @@ struct Event {
   uv_udp_t req;
   JsonBuilder *json;
   char *reusable_base;
+  bool base_alloc;
 };
 
 Status event_init (Server *server);
@@ -147,6 +152,7 @@ struct Api {
   uv_pipe_t req;
   uv_pipe_t client;
   char *reusable_base;
+  bool base_alloc;
 };
 
 Status api_init (Server *server);

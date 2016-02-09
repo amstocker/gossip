@@ -14,12 +14,12 @@ try:
     for i in xrange(10):
         server.send ("{} ".format(i))
 except:
-    print "socket connection refused"
+    print "[PYTHON]", "socket connection refused"
     sys.exit(0)
 
 try:
     data = server.recv(4096)
-    print "got response from server:", data
+    print "[PYTHON]", "got response from server:", data
 except:
-    print "socket recv failed"
+    print "[PYTHON]", "socket recv failed"
     sys.exit(0)

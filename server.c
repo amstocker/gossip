@@ -23,14 +23,17 @@ server_init (Server *server)
   
   Status stat = G_OK;
 
+  debug ("peer init");
   stat = peer_init (server);
   if (stat)
     goto error;
 
+  debug ("event init");
   stat = event_init (server);
   if (stat)
     goto error;
 
+  debug ("api init");
   stat = api_init (server);
   if (stat)
     goto error;
@@ -38,6 +41,7 @@ server_init (Server *server)
   return G_OK;
 
 error:
+  debug ("error");
   return stat;
 }
 
@@ -48,14 +52,17 @@ server_run (Server *server)
   Status stat = G_OK;
   int rc = 0;
 
+  debug ("event start");
   stat = event_start (server);
   if (stat)
     goto error;
 
+  debug ("api start");
   stat = api_start (server);
   if (stat)
     goto error;
 
+  debug ("uv run");
   rc = uv_run (server->loop, UV_RUN_DEFAULT);
   if (rc < 0)
     goto error;
@@ -63,5 +70,6 @@ server_run (Server *server)
   return G_OK;
 
 error:
+  debug ("error");
   return G_ERR;
 }
