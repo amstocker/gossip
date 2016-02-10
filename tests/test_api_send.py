@@ -4,7 +4,7 @@ import sys
 import socket
 
 
-PATH = "/tmp/gossip.sock"
+PATH = "gossip.sock"
 
 server = socket.socket (socket.AF_UNIX, socket.SOCK_STREAM)
 

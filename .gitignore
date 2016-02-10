@@ -1,5 +1,6 @@
 # executables #
-gossip
+gossip-*
+gossip.sock
 __test*
 
 # dependency builds #

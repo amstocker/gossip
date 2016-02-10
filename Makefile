@@ -117,6 +117,7 @@ test-api-send: clean gossip-server
 
 clean:
 	$(RM) gossip-*
+	$(RM) gossip.sock
 	$(RM) __test*
 
 deep-clean: clean

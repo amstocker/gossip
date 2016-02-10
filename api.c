@@ -154,6 +154,9 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 
   debug ("\"%.*s\"", (int) nread, buf->base);
 
+  uv_buf_t echo = { .base = buf->base, .len = nread };
+  api_send (SERVER_FROM_API(API_FROM_CLIENT(client)), &echo, NULL);
+
 
 done:
   debug ("done");

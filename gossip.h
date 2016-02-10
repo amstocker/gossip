@@ -54,7 +54,7 @@ typedef char ID[PEER_ID_SIZE];
 static const char *default_host_ip = "127.0.0.1";
 static const short default_host_port = 9670;
 
-static const char *default_host_pipe = "/tmp/gossip.sock";
+static const char *default_host_pipe = "gossip.sock";
 static const int default_host_backlog = 128;
 
 static const int default_retries = 3;
