@@ -90,19 +90,19 @@ test: test-json-parse \
 	test-api-send \
 	test-message-event
 
-test-json-parse: $(DEPS)
+test-json-parse: debug
 	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_json_parse.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	./__$@
 	$(RM) __$@
 
-test-json-build: $(DEPS)
+test-json-build: debug
 	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_json_build.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	./__$@
 	$(RM) __$@
 
-test-message-event: gossip-server
+test-message-event: debug
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_send.c tests/test_message_event.c \
@@ -112,7 +112,7 @@ test-message-event: gossip-server
 	@echo "[MAKE] stopping test daemon ..."
 	@-sh tests/test_daemon_stop.sh
 
-test-api-send: gossip-server
+test-api-send: debug
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-./tests/test_api_send.py

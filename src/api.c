@@ -86,33 +86,28 @@ static void
 api_newconn (uv_stream_t *req, int status)
 {
   Api *api = (Api *) req;
-  Server *server = SERVER_FROM_API (api);
-  uv_stream_t *client = NULL;
   int rc = 0;
 
   debug ("init client");
-  rc = uv_pipe_init (server->loop, &api->client, 0);
+  rc = uv_pipe_init ((SERVER_FROM_API (api))->loop, &api->client, 0);
   if (rc < 0)
     goto error;
 
   debug ("accept client");
-  client = (uv_stream_t *) &api->client;
-  rc = uv_accept ((uv_stream_t *) api, client);
+  rc = uv_accept ((uv_stream_t *) api, (uv_stream_t *) &api->client);
   if (rc < 0)
     goto error;
 
   debug ("listen client");
-  rc = uv_read_start (client, api_alloc_cb, api_cb);
+  rc = uv_read_start ((uv_stream_t *) &api->client, api_alloc_cb, api_cb);
   if (rc < 0)
     goto error;
 
   return;
 
 error:
-  if (client) {
-    debug ("closing client");
-    uv_close ((uv_handle_t *) client, NULL);
-  }
+  debug ("closing client");
+  uv_close ((uv_handle_t *) &api->client, NULL);
   if (rc)
     debug ("error: %s", uv_strerror (rc));
   return;
