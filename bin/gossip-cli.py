@@ -5,7 +5,7 @@ import socket
 
 PATH = "/tmp/gossip.sock"
 
-server = socket.socket (socket.AF_UNIX, socket.SOCK_DGRAM)
+server = socket.socket (socket.AF_UNIX, socket.SOCK_STREAM)
 server.bind(PATH)
 
 while True:

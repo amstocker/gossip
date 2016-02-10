@@ -3,7 +3,6 @@
 
 static void api_newconn (uv_stream_t *req, int status);
 static void api_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf);
-static void api_write_cb (uv_write_t *req, int status);
 static void api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf);
 
 
@@ -140,16 +139,6 @@ api_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf)
 }
 
 
-void
-api_write_cb (uv_write_t *req, int status)
-{
-  if (status)
-    debug ("error");
-  else
-    debug ("ok");
-}
-
-
 static void
 api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 {
@@ -162,10 +151,6 @@ api_cb (uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
   }
 
   debug ("\"%.*s\"", (int) nread, buf->base);
-
-  uv_buf_t echo = { .base = buf->base, .len = nread };
-
-  api_send (SERVER_FROM_API(API_FROM_CLIENT(client)), &echo, api_write_cb);
 
 
 done:
