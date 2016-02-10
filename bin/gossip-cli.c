@@ -38,9 +38,6 @@ spawn_server ()
   if (rc < 0)
     goto error;
 
-  debug ("waiting 1 sec for spawn ...");
-  sleep (1);
-
   return G_OK;
 
 error:
@@ -201,7 +198,11 @@ main ()
   loop = uv_default_loop ();
   Status stat;
 
-  spawn_server ();
+  stat = spawn_server ();
+  if (stat) {
+    debug ("spawn error");
+    goto error;
+  }
   
   stat = cli_init ();
   if (stat) {
