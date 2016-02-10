@@ -70,19 +70,6 @@ void read_cb (uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
 void worker (void *arg);
 
 
-uv_buf_t*
-make_buf ()
-{
-  uv_buf_t *buf = malloc (sizeof (uv_buf_t));
-  buf->base = malloc (4096);
-  buf->len = 4096;
-  strcpy (buf->base, "andrew wuz here");
-  
-  debug ("allocated buffer: %p", buf);
-  return buf;
-}
-
-
 void
 read_alloc_cb (uv_handle_t *_, size_t suggested, uv_buf_t *buf)
 {
@@ -110,10 +97,8 @@ connect_cb (uv_connect_t *req, int status)
   if (rc < 0)
     goto error;
 
-  // write test
-  debug ("writing test message");
-  uv_buf_t *buf = make_buf ();
-  uv_write (&write_req, (uv_stream_t *) &server_pipe, buf, 1, NULL);
+  // let main thread run go
+  uv_cond_signal (&thread_cond);
   return;
 
 error:
@@ -129,9 +114,6 @@ read_cb (uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
     return;
   
   debug ("echo: \"%.*s\"", (int) nread, buf->base);
-
-  // let main thread run go
-  uv_cond_signal (&thread_cond);
 }
 
   

@@ -1,7 +1,7 @@
 
 .PHONY: make-dirs \
-	test-json \
-	clean quick-clean
+	clean quick-clean \
+	test
 
 
 ## Executables ##
@@ -37,7 +37,7 @@ CFLAGS = -std=c99 \
 	-D_GNU_SOURCE \
 	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
 
-INCLUDE = -I. -Iinclude -Isrc
+INCLUDE = -I. -I./src
 
 LDFLAGS = -lpthread
 
@@ -84,6 +84,11 @@ $(DEPS_BUILD)/libuuid.a: $(DEPS_BUILD) $(DEPS_INCLUDE)
 
 ## Tests ##
 
+test: test-json-parse \
+	test-json-build \
+	test-api-send \
+	test-message-event
+
 test-json-parse: $(DEPS)
 	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_json_parse.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
@@ -96,7 +101,7 @@ test-json-build: $(DEPS)
 	./__$@
 	$(RM) __$@
 
-test-message-event: clean gossip-server
+test-message-event: gossip-server
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_send.c tests/test_message_event.c \
@@ -106,7 +111,7 @@ test-message-event: clean gossip-server
 	@echo "[MAKE] stopping test daemon ..."
 	@-sh tests/test_daemon_stop.sh
 
-test-api-send: clean gossip-server
+test-api-send: gossip-server
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-./tests/test_api_send.py
