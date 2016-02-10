@@ -1,5 +1,6 @@
 # executables #
 gossip
+__test*
 
 # dependency builds #
 deps/include

@@ -26,9 +26,16 @@ api_init (Server *server)
   if (rc < 0)
     goto error;
 
+  debug ("pipe bind: %s", server->host_pipe);
+  rc = uv_pipe_bind ((uv_pipe_t *) api, server->host_pipe);
+  if (rc < 0)
+    goto error;
+
   return G_OK;
 
 error:
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return G_ERR;
 }
 
@@ -39,11 +46,6 @@ api_start (Server *server)
   Api *api = &server->api;
   int rc;
 
-  debug ("pipe bind: %s", server->host_pipe);
-  rc = uv_pipe_bind ((uv_pipe_t *) api, server->host_pipe);
-  if (rc < 0)
-    goto error;
-
   debug ("pipe listen");
   rc = uv_listen ((uv_stream_t *) api, server->host_backlog, api_newconn);
   if (rc < 0)
@@ -52,6 +54,8 @@ api_start (Server *server)
   return G_OK;
 
 error:
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return G_ERR;
 }
 
@@ -72,6 +76,8 @@ api_send (Server *server, uv_buf_t *buf, uv_write_cb callback)
   return G_OK;
 
 error:
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return G_ERR;
 }
 
@@ -102,11 +108,12 @@ api_newconn (uv_stream_t *req, int status)
   return;
 
 error:
-  debug ("error");
   if (client) {
     debug ("closing client");
     uv_close ((uv_handle_t *) client, NULL);
   }
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return;
 }
 
@@ -115,9 +122,10 @@ static void
 api_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf)
 {
   Api *api = API_FROM_CLIENT (req);
+  
   if (api->base_alloc) {
     debug ("buffer double allocated");
-    exit(1);
+    server_fatal (SERVER_FROM_API (api), 1);
   }
 
   debug ("allocating buffer");

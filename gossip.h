@@ -210,3 +210,4 @@ struct Server {
 
 Status server_init (Server *server);
 Status server_run (Server *server);
+void server_fatal (Server *server, int status);

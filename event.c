@@ -70,8 +70,8 @@ event_init (Server *server)
   return G_OK;
 
 error:
-  debug ("error");
-  // TODO: handle libuv error codes properly
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return G_ERR;
 }
 
@@ -90,6 +90,8 @@ event_start (Server *server)
   return G_OK;
 
 error:
+  if (rc)
+    debug ("error: %s", uv_strerror (rc));
   return G_ERR;
 }
 
@@ -98,9 +100,10 @@ static void
 event_alloc_cb (uv_handle_t *req, size_t suggested, uv_buf_t *buf)
 {
   Event *event = (Event *) req;
+  
   if (event->base_alloc) {
     debug ("buffer double allocated");
-    exit (0);
+    server_fatal (SERVER_FROM_EVENT (event), 1);
   }
   
   debug ("allocating buffer");

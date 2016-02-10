@@ -73,3 +73,11 @@ error:
   debug ("error");
   return G_ERR;
 }
+
+
+void
+server_fatal (Server *server, int status)
+{
+  debug ("exit with status %i", status);
+  exit (status);
+}
