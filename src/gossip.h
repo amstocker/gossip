@@ -11,11 +11,15 @@
 #include "utils/macros.h"
 
 
-// DEBUG
+#ifndef DEBUG
+#define debug(M, ...)
+#else
 #include <stdio.h>
 #define debug(M, ...) fprintf (stderr, "[DEBUG %s:%s:%d] " M "\n", \
                                 __FILE__, __FUNCTION__, __LINE__, \
                                 ##__VA_ARGS__)
+#endif
+
 
 
 typedef enum {

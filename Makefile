@@ -1,12 +1,10 @@
 
-.PHONY: make-dirs \
-	clean quick-clean \
-	test
+.PHONY: test debug
 
 
 ## Executables ##
 
-all: gossip-server gossip-cli
+all: gossip-server
 
 LIBUV_VER = 1.8.0
 LEVELDB_VER = 1.18
@@ -35,17 +33,20 @@ CFLAGS = -std=c99 \
 	-O2 \
 	-Wall -Wno-unused-variable \
 	-D_GNU_SOURCE \
-	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
+	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1 \
 
 INCLUDE = -I. -I./src
 
 LDFLAGS = -lpthread
 
-gossip-server: $(DEPS)
-	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) src/bin/gossip-server.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
+CC_SERVER = $(CC) $(CFLAGS) $(INCLUDE) $(SRC) src/bin/gossip-server.c -o gossip-server $(DEPS_BUILD)/* $(LDFLAGS)
 
-gossip-cli: $(DEPS)
-	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) src/bin/gossip-cli.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
+
+gossip-server: $(DEPS)
+	$(CC_SERVER)
+
+debug: $(DEPS)
+	$(CC_SERVER) -DDEBUG
 
 
 ## Dependencies ##
@@ -131,3 +132,4 @@ deep-clean: clean
 	$(RM) -r $(DEPS_BUILD)
 	$(RM) -r $(LIBUV_PATH)
 	$(RM) -r $(LEVELDB_PATH)
+	$(RM) -r $(LIBUUID_PATH)

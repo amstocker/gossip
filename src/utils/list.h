@@ -26,8 +26,8 @@ typedef struct {
 
 #define list_head(L) list_next(L, L)
 #define list_tail(L) list_prev(L, L)
-#define list_pop_head(L) list_remove(l, l->root.next)
-#define list_pop_tail(L) list_remove(l, l->root.prev->prev->next)
+#define list_pop_head(L) list_remove(L, L->root.next)
+#define list_pop_tail(L) list_remove(L, L->root.prev->prev->next)
 
 #define LIST_FOREACH(T, V, L) for(T *V = list_head(L); \
                                   V != NULL; \
