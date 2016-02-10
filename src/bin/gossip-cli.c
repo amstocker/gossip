@@ -58,6 +58,9 @@ uv_pipe_t server_pipe;
 uv_connect_t connect_req;
 uv_write_t write_req;
 
+// pipe reconnect
+int reconn_attempts = 3;
+
 #define global_buf_len 64000
 char global_rbuf[global_buf_len];
 
@@ -94,8 +97,13 @@ connect_cb (uv_connect_t *req, int status)
   int rc = 0;
 
   debug ("checking connection status");
-  if ((rc = status))
+  if ((rc = status)) {
+    if (--reconn_attempts) {
+      debug ("attempting reconnect (%d left) ...", reconn_attempts);
+      uv_pipe_connect (req, &server_pipe, default_host_pipe, connect_cb);
+    }
     goto error;
+  }
 
   debug ("pipe start read");
   rc = uv_read_start ((uv_stream_t *) &server_pipe, read_alloc_cb, read_cb);
@@ -103,6 +111,7 @@ connect_cb (uv_connect_t *req, int status)
     goto error;
 
   // write test
+  debug ("writing test message");
   uv_buf_t *buf = make_buf ();
   uv_write (&write_req, (uv_stream_t *) &server_pipe, buf, 1, NULL);
   return;

@@ -8,9 +8,6 @@
 
 all: gossip-server gossip-cli
 
-
-## Dependencies ##
-
 LIBUV_VER = 1.8.0
 LEVELDB_VER = 1.18
 LIBUUID_VER = 1.0.3
@@ -23,6 +20,35 @@ DEPS_SRC = deps/src
 LIBUV_PATH = $(DEPS_SRC)/libuv/libuv-$(LIBUV_VER)
 LEVELDB_PATH = $(DEPS_SRC)/leveldb/leveldb-$(LEVELDB_VER)
 LIBUUID_PATH = $(DEPS_SRC)/libuuid/libuuid-$(LIBUUID_VER)
+
+
+DEPS = \
+	$(DEPS_BUILD)/libuv.a \
+	$(DEPS_BUILD)/libleveldb.a \
+	$(DEPS_BUILD)/libuuid.a
+
+SRC = $(wildcard src/*.c) \
+	$(wildcard src/thirdparty/*.c) \
+	$(wildcard src/utils/*.c)
+
+CFLAGS = -std=c99 \
+	-O2 \
+	-Wall -Wno-unused-variable \
+	-D_GNU_SOURCE \
+	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
+
+INCLUDE = -I. -Iinclude -Isrc
+
+LDFLAGS = -lpthread
+
+gossip-server: $(DEPS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) src/bin/gossip-server.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
+
+gossip-cli: $(DEPS)
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) src/bin/gossip-cli.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
+
+
+## Dependencies ##
 
 $(DEPS_INCLUDE):
 	mkdir -p $(DEPS_INCLUDE)
@@ -56,41 +82,16 @@ $(DEPS_BUILD)/libuuid.a: $(DEPS_BUILD) $(DEPS_INCLUDE)
 	cp $(LIBUUID_PATH)/.libs/libuuid.a $(DEPS_BUILD)
 
 
-## Main ##
-
-DEPS = \
-	$(DEPS_BUILD)/libuv.a \
-	$(DEPS_BUILD)/libleveldb.a \
-	$(DEPS_BUILD)/libuuid.a
-
-SRC = $(wildcard *.c) \
-	$(wildcard thirdparty/*.c) \
-	$(wildcard utils/*.c)
-
-CFLAGS = -std=c99 \
-	-O2 \
-	-Wall -Wno-unused-variable \
-	-D_GNU_SOURCE \
-	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
-
-LDFLAGS = -lpthread
-
-gossip-server: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) bin/gossip-server.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
-
-gossip-cli: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) bin/gossip-cli.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
-
 ## Tests ##
 
 test-json-parse: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json_parse.c \
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_json_parse.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	./__$@
 	$(RM) __$@
 
 test-json-build: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) tests/test_json_build.c \
+	$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_json_build.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	./__$@
 	$(RM) __$@
@@ -98,7 +99,7 @@ test-json-build: $(DEPS)
 test-message-event: clean gossip-server
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
-	@-$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
+	@-$(CC) $(CFLAGS) $(INCLUDE) $(SRC) tests/test_send.c tests/test_message_event.c \
 		-o __$@ $(DEPS_BUILD)/* $(LDFLAGS)
 	@-./__$@
 	@-$(RM) __$@
