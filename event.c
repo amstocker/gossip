@@ -26,7 +26,7 @@ Status
 event_init (Server *server)
 {
   Event *event = &server->event;
-  int rc;
+  int rc = 0;
 
   event->reusable_base = NULL;
   event->base_alloc = false;
@@ -80,7 +80,7 @@ Status
 event_start (Server *server)
 {
   Event *event = &server->event;
-  int rc;
+  int rc = 0;
 
   debug ("udp recv start");
   rc = uv_udp_recv_start ((uv_udp_t *) event, event_alloc_cb, event_cb);

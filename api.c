@@ -10,7 +10,7 @@ Status
 api_init (Server *server)
 {
   Api *api = &server->api;
-  int rc;
+  int rc = 0;
 
   api->reusable_base = NULL;
   api->base_alloc = false;
@@ -43,7 +43,7 @@ Status
 api_start (Server *server)
 {
   Api *api = &server->api;
-  int rc;
+  int rc = 0;
 
   debug ("pipe listen");
   rc = uv_listen ((uv_stream_t *) api, server->host_backlog, api_newconn);
@@ -63,12 +63,13 @@ Status
 api_send (Server *server, uv_buf_t *buf, uv_write_cb callback)
 {
   uv_pipe_t *client = (uv_pipe_t *) &server->api.client;
-  
+  int rc = 0;
+
   if (!uv_is_active ((uv_handle_t *) client))
     goto error;
 
   uv_write_t req;
-  int rc = uv_write (&req, (uv_stream_t *) client, buf, 1, callback);
+  rc = uv_write (&req, (uv_stream_t *) client, buf, 1, callback);
   if (rc < 0)
     goto error;
 
@@ -86,7 +87,8 @@ api_newconn (uv_stream_t *req, int status)
 {
   Api *api = (Api *) req;
   Server *server = SERVER_FROM_API (api);
-  int rc;
+  uv_stream_t *client = NULL;
+  int rc = 0;
 
   debug ("init client");
   rc = uv_pipe_init (server->loop, &api->client, 0);
@@ -94,7 +96,7 @@ api_newconn (uv_stream_t *req, int status)
     goto error;
 
   debug ("accept client");
-  uv_stream_t *client = (uv_stream_t *) &api->client;
+  client = (uv_stream_t *) &api->client;
   rc = uv_accept ((uv_stream_t *) api, client);
   if (rc < 0)
     goto error;

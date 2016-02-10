@@ -6,7 +6,7 @@
 
 ## Executables ##
 
-all: gossip
+all: gossip-server gossip-cli
 
 
 ## Dependencies ##
@@ -63,20 +63,23 @@ DEPS = \
 	$(DEPS_BUILD)/libleveldb.a \
 	$(DEPS_BUILD)/libuuid.a
 
-SRC = $(filter-out gossip.c, $(wildcard *.c)) \
+SRC = $(wildcard *.c) \
 	$(wildcard thirdparty/*.c) \
 	$(wildcard utils/*.c)
 
 CFLAGS = -std=c99 \
+	-O2 \
 	-Wall -Wno-unused-variable \
 	-D_GNU_SOURCE \
 	-DJSMN_STRICT=1 -DJSMN_PARENT_LINKS=1
 
 LDFLAGS = -lpthread
 
-gossip: $(DEPS)
-	$(CC) $(CFLAGS) -I. $(SRC) gossip.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
+gossip-server: $(DEPS)
+	$(CC) $(CFLAGS) -I. $(SRC) bin/gossip-server.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
 
+gossip-cli: $(DEPS)
+	$(CC) $(CFLAGS) -I. $(SRC) bin/gossip-cli.c -o $@ $(DEPS_BUILD)/* $(LDFLAGS)
 
 ## Tests ##
 
@@ -92,7 +95,7 @@ test-json-build: $(DEPS)
 	./__$@
 	$(RM) __$@
 
-test-message-event: clean gossip
+test-message-event: clean gossip-server
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-$(CC) $(CFLAGS) -I. $(SRC) tests/test_send.c tests/test_message_event.c \
@@ -102,7 +105,7 @@ test-message-event: clean gossip
 	@echo "[MAKE] stopping test daemon ..."
 	@-sh tests/test_daemon_stop.sh
 
-test-api-send: clean gossip
+test-api-send: clean gossip-server
 	@echo "[MAKE] starting test daemon ..."
 	@-sh tests/test_daemon_start.sh
 	@-./tests/test_api_send.py
@@ -113,7 +116,7 @@ test-api-send: clean gossip
 ## Clean ##
 
 clean:
-	$(RM) gossip
+	$(RM) gossip-*
 	$(RM) __test*
 
 deep-clean: clean

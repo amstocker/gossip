@@ -1,3 +1,3 @@
 #!/bin/bash
 
-((./gossip) & echo $! > __test_daemon.pid &)
+((./gossip-server) & echo $! > __test_daemon.pid &)

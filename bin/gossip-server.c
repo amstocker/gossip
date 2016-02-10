@@ -1,9 +1,10 @@
 #include "gossip.h"
 
 
+Server server;
+
 int main ()
 {
-  Server server;
   Status stat;
 
   debug ("init");
